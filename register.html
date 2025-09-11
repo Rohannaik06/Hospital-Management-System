@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Registration</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+        }
+        .wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            transition: filter 0.3s ease;
+        }
+        .blur {
+            filter: blur(4px);
+        }
+        .form-container {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0077b6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005f87;
+        }
+        h2 {
+            color: #023e8a;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .message {
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.3);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 {
+            color: #2a9d8f;
+            margin-bottom: 20px;
+        }
+        .modal-content a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #0077b6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        .modal-content a:hover {
+            background-color: #005f87;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper" id="mainWrapper">
+    <div class="form-container">
+
+        <h2>Patient Registration</h2>
+
+        <form method="post" action="register.html">
+            <input type="text" name="fullname" placeholder="Full Name" required />
+            <input type="text" name="address" placeholder="Address" required />
+            <input type="tel" name="phone" placeholder="Phone Number" pattern="[0-9]{10}" title="Enter 10-digit phone number" required />
+            <input type="text" name="username" placeholder="Username" required />
+            <input type="password" name="password" placeholder="Password" minlength="6" required />
+            <button type="submit">Register</button>
+        </form>
+
+    </div>
+</div>
+
+<div class="modal" id="successModal">
+    <div class="modal-content">
+        <h3>Registered Successfully!</h3>
+        <a href="patientlogin.html">Go to Login</a>
+    </div>
+</div>
+
+</body>
+</html>

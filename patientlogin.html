@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Login</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .form-container {
+      background-color: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #023e8a;
+      margin-bottom: 25px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0077b6;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005f87;
+    }
+    .switch-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .switch-link a {
+      color: #0077b6;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
+    .message {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container">
+
+  <div id="login-form">
+    <h2>Patient Login</h2>
+    <form method="post" action="patientlogin.html">
+      <input type="hidden" name="formType" value="login" />
+      <input type="text" name="email" placeholder="Username" required />
+      <input type="password" name="password" placeholder="Password" minlength="6" required />
+      <button type="submit">Login</button>
+    </form>
+    <div class="switch-link">
+      Not registered? <a onclick="toggleForms()">Register here</a>
+    </div>
+  </div>
+
+  <div id="register-form" class="hidden">
+    <h2>Register</h2>
+    <form method="post" action="register.html">
+      <input type="text" name="fullname" placeholder="Full Name" required />
+      <input type="text" name="address" placeholder="Address" required />
+      <input type="tel" name="phone" placeholder="Phone Number" pattern="[0-9]{10}" title="Enter 10-digit phone number" required />
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="password" name="password" placeholder="Password" minlength="6" required />
+      <button type="submit">Register</button>
+    </form>
+    <div class="switch-link">
+      Already registered? <a onclick="toggleForms()">Login here</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleForms() {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    loginForm.classList.toggle('hidden');
+    registerForm.classList.toggle('hidden');
+  }
+</script>
+
+</body>
+</html>

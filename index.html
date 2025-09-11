@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Health Portal System - Login</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+  }
+  .container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 3.5rem;
+    color: #023e8a;
+    margin-bottom: 40px;
+    font-weight: 900;
+    letter-spacing: 2px;
+  }
+  .login-options {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 500px;
+    width: 100%;
+  }
+  .login-btn {
+    flex: 1 1 200px;
+    padding: 25px 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    background: #0077b6;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0, 119, 182, 0.4);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+  .login-btn:hover {
+    background: #005f87;
+    box-shadow: 0 8px 15px rgba(0, 95, 135, 0.6);
+  }
+  footer {
+    background: #023e8a;
+    color: white;
+    padding: 15px 10px;
+    text-align: center;
+    font-size: 0.9rem;
+    user-select: none;
+  }
+  footer a {
+    color: #90e0ef;
+    text-decoration: none;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+    }
+    .login-btn {
+      font-size: 1.5rem;
+      padding: 20px 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  
+  <h1>Health Portal System</h1>
+  <div class="login-options">
+    <button class="login-btn" onclick="goToLogin('doctor')">Doctor Login</button>
+    <button class="login-btn" onclick="goToLogin('patient')">Patient Login</button>
+  </div>
+  
+</div>
+
+<footer>
+  &copy; 2025 Health Portal System. All rights reserved. | 
+  <a href="/privacy-policy.html">Privacy Policy</a> | 
+  <a href="/contact.html">Contact Us</a>
+</footer>
+
+<script>
+  function goToLogin(userType) {
+    if(userType === 'doctor') {
+      window.location.href = 'doctorlogin.html';
+    } else if(userType === 'patient') {
+      window.location.href = 'patientlogin.html'; 
+    }
+  }
+</script>
+
+</body>
+</html>
