@@ -81,9 +81,9 @@
 
   <div id="login-form">
     <h2>Patient Login</h2>
-    <form method="post" action="userdashboard.html">
+    <form id="loginForm" method="post" action="/api/login">
       <input type="hidden" name="formType" value="login" />
-      <input type="text" name="email" placeholder="Username" required />
+      <input type="email" name="email" placeholder="Email" required />
       <input type="password" name="password" placeholder="Password" minlength="6" required />
       <button type="submit">Login</button>
     </form>
@@ -94,7 +94,7 @@
 
   <div id="register-form" class="hidden">
     <h2>Register</h2>
-    <form method="post" action="register.html">
+    <form id="registerForm" method="post" action="/api/register">
       <input type="text" name="fullname" placeholder="Full Name" required />
       <input type="text" name="address" placeholder="Address" required />
       <input type="tel" name="phone" placeholder="Phone Number" pattern="[0-9]{10}" title="Enter 10-digit phone number" required />
