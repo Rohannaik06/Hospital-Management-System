@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Health Portal System - Login</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body, html {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #90e0ef, #0077b6, #023e8a);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+    color: #333;
+  }
+  .container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  h1 {
+    font-size: 3.5rem;
+    color: #fff;
+    margin-bottom: 30px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 2px 3px 6px rgba(0,0,0,0.3);
+  }
+  .login-options {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 700px;
+    width: 100%;
+  }
+  .login-card {
+    flex: 1 1 250px;
+    background: #fff;
+    border-radius: 15px;
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+  .login-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+  }
+  .login-icon {
+    font-size: 3rem;
+    color: #0077b6;
+    margin-bottom: 20px;
+  }
+  .login-btn {
+    margin-top: 20px;
+    padding: 15px 25px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #fff;
+    background: #0077b6;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  .login-btn:hover {
+    background: #005f87;
+    transform: scale(1.05);
+  }
+  footer {
+    background: #023e8a;
+    color: white;
+    padding: 15px 10px;
+    text-align: center;
+    font-size: 0.9rem;
+    user-select: none;
+  }
+  footer a {
+    color: #90e0ef;
+    text-decoration: none;
+    margin-left: 10px;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 25px;
+    }
+    .login-card {
+      padding: 25px 15px;
+    }
+    .login-btn {
+      font-size: 1.1rem;
+      padding: 12px 20px;
+    }
+  }
+</style>
+<!-- Using Font Awesome for icons -->
+<script src="https://kit.fontawesome.com/5b7b94b995.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="container">
+  <h1>Health Portal System</h1>
+  <div class="login-options">
+    
+    <div class="login-card" onclick="goToLogin('doctor')">
+      <div class="login-icon"><i class="fas fa-user-md"></i></div>
+      <h2>Doctor Portal</h2>
+      <p>Access patient records, manage appointments, and view reports.</p>
+      <button class="login-btn">Login as Doctor</button>
+    </div>
+    
+    <div class="login-card" onclick="goToLogin('patient')">
+      <div class="login-icon"><i class="fas fa-hospital-user"></i></div>
+      <h2>Patient Portal</h2>
+      <p>Book appointments, check prescriptions, and review medical history.</p>
+      <button class="login-btn">Login as Patient</button>
+    </div>
+    
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 Health Portal System. All rights reserved. | 
+  <a href="/privacy-policy.html">Privacy Policy</a> | 
+  <a href="/contact.html">Contact Us</a>
+</footer>
+
+<script>
+  function goToLogin(userType) {
+    if(userType === 'doctor') {
+      window.location.href = 'doctorlogin.jsp';
+    } else if(userType === 'patient') {
+      window.location.href = 'patientlogin.jsp'; 
+    }
+  }
+</script>
+
+</body>
+</html>
