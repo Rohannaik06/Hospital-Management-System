@@ -51,19 +51,6 @@
         button:hover {
             background-color: #005f87;
         }
-        .switch-link {
-            text-align: center;
-            margin-top: 15px;
-        }
-        .switch-link a {
-            color: #0077b6;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .hidden {
-            display: none;
-        }
         .message {
             text-align: center;
             margin-bottom: 15px;
@@ -75,6 +62,20 @@
         .error {
             color: red;
         }
+        .register-link {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        .register-link a {
+            color: #0077b6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -83,7 +84,7 @@
     String loginMessage = "";
     boolean loginSuccess = false;
 
-    if ("POST".equalsIgnoreCase(request.getMethod()) && request.getParameter("formType") != null && request.getParameter("formType").equals("login")) {
+    if ("POST".equalsIgnoreCase(request.getMethod()) && "login".equals(request.getParameter("formType"))) {
         String username = request.getParameter("email");
         String password = request.getParameter("password");
 
@@ -103,12 +104,9 @@
 
                 if (rs.next()) {
                     String fullname = rs.getString("fullname");
-                    
                     loginSuccess = true;
-                    // Store the username and fullname in the session
-                    session.setAttribute("user", username); 
+                    session.setAttribute("user", username);
                     session.setAttribute("fullname", fullname);
-                    
                     loginMessage = "Login successful! Redirecting to dashboard...";
                 } else {
                     loginMessage = "Invalid email or password.";
@@ -136,44 +134,18 @@
         <% } %>
     <% } %>
 
-    <div id="login-form" class="<%= loginSuccess ? "hidden" : "" %>">
-        <h2>Patient Login</h2>
-        <form method="post" action="patientlogin.jsp">
-            <input type="hidden" name="formType" value="login" />
-            <input type="text" name="email" placeholder="Email" required />
-            <input type="password" name="password" placeholder="Password" minlength="6" required />
-            <button type="submit">Login</button>
-        </form>
-        <div class="switch-link">
-            Not registered? <a onclick="toggleForms()">Register here</a>
-        </div>
-    </div>
+    <h2>Patient Login</h2>
+    <form method="post" action="patientlogin.jsp">
+        <input type="hidden" name="formType" value="login" />
+        <input type="text" name="email" placeholder="Email" required />
+        <input type="password" name="password" placeholder="Password" minlength="6" required />
+        <button type="submit">Login</button>
+    </form>
 
-    <div id="register-form" class="hidden">
-        <h2>Register</h2>
-        <form method="post" action="register.jsp">
-            <input type="text" name="fullname" placeholder="Full Name" required />
-            <input type="text" name="address" placeholder="Address" required />
-            <input type="tel" name="phone" placeholder="Phone Number" pattern="[0-9]{10}" title="Enter 10-digit phone number" required />
-            <input type="text" name="username" placeholder="Username" required />
-            <input type="password" name="password" placeholder="Password" minlength="6" required />
-            <button type="submit">Register</button>
-        </form>
-        <div class="switch-link">
-            Already registered? <a onclick="toggleForms()">Login here</a>
-        </div>
+    <div class="register-link">
+        Not registered? <a href="register.jsp">Create an account</a>
     </div>
-
 </div>
-
-<script>
-    function toggleForms() {
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        loginForm.classList.toggle('hidden');
-        registerForm.classList.toggle('hidden');
-    }
-</script>
 
 </body>
 </html>

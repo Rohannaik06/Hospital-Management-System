@@ -3,18 +3,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>User Dashboard</title>
     <style>
-        /* Reset and Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Header and Sidebar Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f4f6f9;
+            margin: 0;
             color: #333;
         }
         .main-header {
@@ -45,8 +41,6 @@
             font-size: 22px;
             font-weight: 600;
         }
-
-        /* Modern Search Styles */
         .center-section {
             flex-grow: 1;
             display: flex;
@@ -87,7 +81,6 @@
             background: linear-gradient(135deg, #005f87, #0096c7);
             transform: scale(1.05);
         }
-
         .right-section {
             position: relative;
             display: flex;
@@ -182,16 +175,83 @@
         .sidebar.active ~ .dashboard-content {
             margin-left: 240px;
         }
-        footer {
-            background: #023e8a;
-            color: white;
+        /* Doctor card styles */
+        .cards-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .doctor-card {
+            min-width: 410px;
+            border-radius: 14px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.10);
+            overflow: hidden;
+            margin-bottom: 36px;
+            background: white;
+        }
+        .doctor-card-top {
+            background: #e3f2fd;
             text-align: center;
-            padding: 15px 10px;
-            font-size: 0.9rem;
+            padding: 42px 0;
+        }
+        .doctor-card-title {
+            font-size: 2.1rem;
+            color: #0466c8;
+            font-weight: 700;
+        }
+        .doctor-card-body {
+            background: #fff;
+            padding: 28px 26px 22px 26px;
+        }
+        .doctor-card-body h2 {
+            margin-bottom: 6px;
+            color: #14213d;
+            font-size: 1.32rem;
+            font-weight: 700;
+        }
+        .doctor-card-detail {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        .doctor-card-actions {
+            margin-top: 18px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 18px;
+        }
+        .doctor-card-link {
+            color: #1976d2;
+            text-decoration: underline;
+        }
+        .doctor-card-btn {
+            background: #1976d2;
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        /* Footer styles */
+        footer {
+            background: #0a4275;
+            color: white;
+            padding: 16px 40px;
+            text-align: center;
+            font-size: 14px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.15);
+            margin-top: 40px;
         }
         footer a {
-            color: #90e0ef;
+            color: #8ecae6;
             text-decoration: none;
+            margin: 0 8px;
+            font-weight: 500;
         }
         footer a:hover {
             text-decoration: underline;
@@ -199,6 +259,10 @@
         @media screen and (max-width: 768px) {
             .center-section { display: none; }
             .dashboard-content { padding: 20px; }
+            footer {
+                font-size: 12px;
+                padding: 12px 20px;
+            }
         }
     </style>
 </head>
@@ -206,40 +270,39 @@
 
 <%
     String fullname = (String) session.getAttribute("fullname");
-    String profileEmoji = "👤"; // default emoji
+    String profileEmoji = "👤";
 
     if (fullname == null || fullname.isEmpty()) {
         response.sendRedirect("patientlogin.jsp");
         return;
     }
 
-    Connection conn = null;
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-
+    Connection conn1 = null;
+    PreparedStatement ps1 = null;
+    ResultSet rs1 = null;
     try {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
-
-        String sql = "SELECT gender FROM patients WHERE fullname = ?";
-        ps = conn.prepareStatement(sql);
-        ps.setString(1, fullname);
-        rs = ps.executeQuery();
-
-        if (rs.next()) {
-            String gender = rs.getString("gender");
+        Class.forName("com.mysql.jdbc.Driver");
+        conn1 = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
+        String sqlGender = "SELECT gender FROM patients WHERE fullname = ?";
+        ps1 = conn1.prepareStatement(sqlGender);
+        ps1.setString(1, fullname);
+        rs1 = ps1.executeQuery();
+        if (rs1.next()) {
+            String gender = rs1.getString("gender");
             if ("Male".equalsIgnoreCase(gender)) {
                 profileEmoji = "👨";
             } else if ("Female".equalsIgnoreCase(gender)) {
                 profileEmoji = "👩";
             }
         }
-    } catch (Exception e) {
-        System.err.println("Database error: " + e.getMessage());
+    } catch (ClassNotFoundException e) {
+        out.println("<div style='color:red;'>JDBC Driver not found: " + e.getMessage() + "</div>");
+    } catch (SQLException e) {
+        out.println("<div style='color:red;'>Database error: " + e.getMessage() + "</div>");
     } finally {
-        try { if(rs != null) rs.close(); } catch(SQLException e) {}
-        try { if(ps != null) ps.close(); } catch(SQLException e) {}
-        try { if(conn != null) conn.close(); } catch(SQLException e) {}
+        try { if (rs1 != null) rs1.close(); } catch (SQLException e) {}
+        try { if (ps1 != null) ps1.close(); } catch (SQLException e) {}
+        try { if (conn1 != null) conn1.close(); } catch (SQLException e) {}
     }
 %>
 
@@ -250,7 +313,7 @@
     </div>
 
     <div class="center-section">
-        <input type="text" class="search-box" placeholder="Search hospitals...">
+        <input type="text" class="search-box" placeholder="Search hospitals..." />
         <button class="search-btn">Search</button>
     </div>
 
@@ -279,12 +342,59 @@
 </nav>
 
 <div class="dashboard-content">
-    <!-- Dashboard main content -->
+    <div class="cards-wrapper">
+    <%
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
+            String sql = "SELECT * FROM doctors ORDER BY id DESC";
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+    %>
+        <div class="doctor-card">
+            <div class="doctor-card-top">
+                <span class="doctor-card-title">HOSPITAL PHOTO</span>
+            </div>
+            <div class="doctor-card-body">
+                <h2><%= rs.getString("hospital_name") %></h2>
+                <div class="doctor-card-detail"><b>Address:</b><%= rs.getString("address") %> </div>
+                <div class="doctor-card-detail"><b>Dr. Name:</b> <%= rs.getString("fullname") %></div>
+                <div class="doctor-card-detail"><b>Specialization:</b> <%= rs.getString("specialization") %></div>
+                <div class="doctor-card-detail"><b>Qualification:</b> <%= rs.getString("qualification") %></div>
+                <div class="doctor-card-detail"><b>License:</b> <%= rs.getString("license") %></div>
+                <div class="doctor-card-detail"><b>Contact:</b> <%= rs.getString("phone") %> | <%= rs.getString("email") %></div>
+                <div class="doctor-card-detail" style="color:#22a6b3; font-weight: 500;">
+                    Focus on <%= rs.getString("specialization") %> and preventative care.
+                </div>
+                <div class="doctor-card-actions">
+                    <a href="#" class="doctor-card-link">View Details</a>
+                    <a href="#" class="doctor-card-btn">Book Appointment</a>
+                </div>
+            </div>
+        </div>
+    <%
+            }
+        } catch (ClassNotFoundException e) {
+            out.println("<div style='color:red;'>JDBC Driver not found: " + e.getMessage() + "</div>");
+        } catch (SQLException e) {
+            out.println("<div style='color:red;'>Database error: " + e.getMessage() + "</div>");
+        } finally {
+            try { if (rs != null) rs.close(); } catch (SQLException e) {}
+            try { if (ps != null) ps.close(); } catch (SQLException e) {}
+            try { if (conn != null) conn.close(); } catch (SQLException e) {}
+        }
+    %>
+    </div>
 </div>
 
 <footer>
-    &copy; 2025 Health Portal. All rights reserved. | 
-    <a href="/privacy-policy.html">Privacy Policy</a> | 
+    &copy; 2025 Health Portal. All rights reserved. |
+    <a href="/privacy-policy.html">Privacy Policy</a> |
     <a href="/contact.html">Contact Us</a>
 </footer>
 

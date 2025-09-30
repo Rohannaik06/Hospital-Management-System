@@ -1,9 +1,8 @@
 <%@ page import="java.sql.*" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8" />
     <title>Doctor Registration - JSP</title>
     <style>
         body {
@@ -29,13 +28,14 @@
             color: #023e8a;
             margin-bottom: 25px;
         }
-        input {
+        input, textarea {
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 10px;
             font-size: 1rem;
+            box-sizing: border-box;
         }
         button {
             width: 100%;
@@ -73,6 +73,7 @@
         String fullname = request.getParameter("fullname");
         String specialization = request.getParameter("specialization");
         String hospitalName = request.getParameter("hospital_name");
+        String address = request.getParameter("address");
         String license = request.getParameter("license");
         String qualification = request.getParameter("qualification");
         String phone = request.getParameter("phone");
@@ -80,9 +81,9 @@
         String password = request.getParameter("password");
 
         if (fullname != null && specialization != null && license != null && qualification != null &&
-            phone != null && email != null && hospitalName != null && password != null &&
+            phone != null && email != null && hospitalName != null && address != null && password != null &&
             !fullname.isEmpty() && !specialization.isEmpty() && !license.isEmpty() && !qualification.isEmpty() &&
-            !phone.isEmpty() && !email.isEmpty() && !hospitalName.isEmpty() && !password.isEmpty()) {
+            !phone.isEmpty() && !email.isEmpty() && !hospitalName.isEmpty() && !address.isEmpty() && !password.isEmpty()) {
 
             Connection conn = null;
             PreparedStatement ps = null;
@@ -90,16 +91,17 @@
                 Class.forName("com.mysql.jdbc.Driver");
                 conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
 
-                String sql = "INSERT INTO doctors (fullname, specialization, license, qualification, phone, email, hospital_name, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                String sql = "INSERT INTO doctors (fullname, specialization, hospital_name, address, license, qualification, phone, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 ps = conn.prepareStatement(sql);
                 ps.setString(1, fullname);
                 ps.setString(2, specialization);
-                ps.setString(3, license);
-                ps.setString(4, qualification);
-                ps.setString(5, phone);
-                ps.setString(6, email);
-                ps.setString(7, hospitalName);
-                ps.setString(8, password); // For real-world, hash this!
+                ps.setString(3, hospitalName);
+                ps.setString(4, address);
+                ps.setString(5, license);
+                ps.setString(6, qualification);
+                ps.setString(7, phone);
+                ps.setString(8, email);
+                ps.setString(9, password); // For real-world applications, remember to hash passwords
 
                 int rows = ps.executeUpdate();
                 if (rows > 0) {
@@ -137,6 +139,7 @@
         <input type="text" name="fullname" placeholder="Full Name" required />
         <input type="text" name="specialization" placeholder="Specialization (e.g., Cardiologist)" required />
         <input type="text" name="hospital_name" placeholder="Hospital Name" required />
+        <input type="text" name="address" placeholder="Address" required />
         <input type="text" name="license" placeholder="Medical License Number" required />
         <input type="text" name="qualification" placeholder="Qualification (e.g., MBBS, MD)" required />
         <input type="tel" name="phone" placeholder="Phone Number" pattern="[0-9]{10}" title="Enter 10-digit phone number" required />
