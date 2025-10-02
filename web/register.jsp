@@ -106,80 +106,80 @@
 <div class="wrapper" id="mainWrapper">
     <div class="form-container">
 
-<%
-    String message = "";
-    boolean isError = false;
-    boolean showSuccessModal = false;
+    <%
+        String message = "";
+        boolean isError = false;
+        boolean showSuccessModal = false;
 
-    // Retain input values
-    String fullname = "";
-    String gender = "";
-    String address = "";
-    String phone = "";
-    String username = "";
+        // Retain input values
+        String fullname = "";
+        String gender = "";
+        String address = "";
+        String phone = "";
+        String username = "";
 
-    if ("POST".equalsIgnoreCase(request.getMethod())) {
-        fullname = request.getParameter("fullname") != null ? request.getParameter("fullname").trim() : "";
-        gender = request.getParameter("gender") != null ? request.getParameter("gender").trim() : "";
-        address = request.getParameter("address") != null ? request.getParameter("address").trim() : "";
-        phone = request.getParameter("phone") != null ? request.getParameter("phone").trim() : "";
-        username = request.getParameter("username") != null ? request.getParameter("username").trim() : "";
-        String password = request.getParameter("password") != null ? request.getParameter("password").trim() : "";
+        if ("POST".equalsIgnoreCase(request.getMethod())) {
+            fullname = request.getParameter("fullname") != null ? request.getParameter("fullname").trim() : "";
+            gender = request.getParameter("gender") != null ? request.getParameter("gender").trim() : "";
+            address = request.getParameter("address") != null ? request.getParameter("address").trim() : "";
+            phone = request.getParameter("phone") != null ? request.getParameter("phone").trim() : "";
+            username = request.getParameter("username") != null ? request.getParameter("username").trim() : "";
+            String password = request.getParameter("password") != null ? request.getParameter("password").trim() : "";
 
-        if (fullname.isEmpty() || gender.isEmpty() || address.isEmpty() || phone.isEmpty() || username.isEmpty() || password.isEmpty()) {
-            message = "Please fill in all fields.";
-            isError = true;
-        } else {
-            Connection conn = null;
-            PreparedStatement ps = null;
-            try {
-                Class.forName("com.mysql.jdbc.Driver");
-                conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
-
-                // Check if username already exists
-                String checkSql = "SELECT COUNT(*) FROM patients WHERE username = ?";
-                ps = conn.prepareStatement(checkSql);
-                ps.setString(1, username);
-                ResultSet rs = ps.executeQuery();
-                rs.next();
-                int count = rs.getInt(1);
-                rs.close();
-                ps.close();
-
-                if (count > 0) {
-                    message = "Username already taken. Please choose another.";
-                    isError = true;
-                } else {
-                    String sql = "INSERT INTO patients (fullname, gender, address, phone, username, password) VALUES (?, ?, ?, ?, ?, ?)";
-                    ps = conn.prepareStatement(sql);
-                    ps.setString(1, fullname);
-                    ps.setString(2, gender);
-                    ps.setString(3, address);
-                    ps.setString(4, phone);
-                    ps.setString(5, username);
-                    ps.setString(6, password); // Secure in production - hash passwords!
-
-                    int result = ps.executeUpdate();
-
-                    if (result > 0) {
-                        showSuccessModal = true;
-                        fullname = gender = address = phone = username = "";
-                    } else {
-                        message = "Registration failed. Please try again.";
-                        isError = true;
-                    }
-                }
-
-            } catch (Exception e) {
-                message = "Error: " + e.getMessage();
+            if (fullname.isEmpty() || gender.isEmpty() || address.isEmpty() || phone.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                message = "Please fill in all fields.";
                 isError = true;
-            } finally {
-                try { if (ps != null) ps.close(); } catch (Exception e) {}
-                try { if (conn != null) conn.close(); } catch (Exception e) {}
+            } else {
+                Connection conn = null;
+                PreparedStatement ps = null;
+                try {
+                    Class.forName("com.mysql.jdbc.Driver");
+                    conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
+
+                    // Check if username already exists
+                    String checkSql = "SELECT COUNT(*) FROM patients WHERE username = ?";
+                    ps = conn.prepareStatement(checkSql);
+                    ps.setString(1, username);
+                    ResultSet rs = ps.executeQuery();
+                    rs.next();
+                    int count = rs.getInt(1);
+                    rs.close();
+                    ps.close();
+
+                    if (count > 0) {
+                        message = "Username already taken. Please choose another.";
+                        isError = true;
+                    } else {
+                        String sql = "INSERT INTO patients (fullname, gender, address, phone, username, password) VALUES (?, ?, ?, ?, ?, ?)";
+                        ps = conn.prepareStatement(sql);
+                        ps.setString(1, fullname);
+                        ps.setString(2, gender);
+                        ps.setString(3, address);
+                        ps.setString(4, phone);
+                        ps.setString(5, username);
+                        ps.setString(6, password); // Secure in production - hash passwords!
+
+                        int result = ps.executeUpdate();
+
+                        if (result > 0) {
+                            showSuccessModal = true;
+                            fullname = gender = address = phone = username = "";
+                        } else {
+                            message = "Registration failed. Please try again.";
+                            isError = true;
+                        }
+                    }
+
+                } catch (Exception e) {
+                    message = "Error: " + e.getMessage();
+                    isError = true;
+                } finally {
+                    try { if (ps != null) ps.close(); } catch (Exception e) {}
+                    try { if (conn != null) conn.close(); } catch (Exception e) {}
+                }
             }
         }
-    }
-%>
+    %>
 
 <h2>Patient Registration</h2>
 
