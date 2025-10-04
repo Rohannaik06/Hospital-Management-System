@@ -52,12 +52,12 @@
         .close-btn:hover { color: red; }
         .modal h2 { margin-top: 0; color: #0466c8; }
         .modal p { margin: 8px 0; font-size: 0.95rem; }
-        footer { background: #0a4275; color: white; padding: 16px 40px; text-align: center; font-size: 14px; position: relative; bottom: 0; width: 100%; box-shadow: 0 -2px 6px rgba(0,0,0,0.15); margin-top: 40px; }
+        footer { background: #0a4275; color: white; padding: 16px 42px; text-align: center; font-size: 14px; position: relative; bottom: 0; width: 94.5%; box-shadow: 0 -2px 6px rgba(0,0,0,0.15); margin-top: 40px; }
         footer a { color: #8ecae6; text-decoration: none; margin: 0 8px; font-weight: 500; }
         footer a:hover { text-decoration: underline; }
         @media screen and (max-width: 768px) {
             .center-section { display: none; }
-            .dashboard-content { padding: 20px; }
+            .dashboard-content { padding: 20px }
             footer { font-size: 12px; padding: 12px 20px; }
         }
     </style>
