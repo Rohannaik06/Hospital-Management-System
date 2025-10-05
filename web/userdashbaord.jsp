@@ -117,14 +117,21 @@
             <div class="profile-photo"><%= profileEmoji %></div>
             <div class="profile-name"><%= fullname %></div>
             <div class="dropdown-menu" id="dropdownMenu">
-                <a href="#">My Profile</a><a href="#">Edit Profile</a><a href="#">Appointments</a><a href="patientlogin.jsp" class="logout-link">Logout</a>
+                <a href="patient_profile.jsp">My Profile</a>
+                <a href="patientlogin.jsp" class="logout-link">Logout</a>
             </div>
         </div>
     </div>
 </header>
 
 <nav class="sidebar" id="sidebar">
-    <a href="#">My Profile</a><a href="#">Appointments</a><a href="#">Saved</a><a href="#">Settings</a><a href="#">About Us</a><a href="#">Contact</a><a href="patientlogin.jsp" class="logout-link">Logout</a>
+    <a href="patient_profile.jsp">My Profile</a>
+    <a href="#">Saved</a>
+    <a href="#">Settings</a>
+    <a href="#">About Us</a>
+    <a href="#">Contact</a>
+    <a href="#">Share</a>
+    <a href="patientlogin.jsp" class="logout-link">Logout</a>
 </nav>
 
 <div class="dashboard-content">
