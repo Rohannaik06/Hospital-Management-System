@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <title>Doctor Dashboard</title>
     <style>
-        /* Your original styles with select color styling */
+        /* Your original styles */
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -65,9 +65,46 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative;
         }
         .card-box h2 { font-size: 18px; margin-bottom: 15px; color:#222; }
-        .search-container { position: relative; width: 100%; margin-bottom: 12px; }
+        
+        /* Layout for Search and Button: Search fills space, button is fixed size */
+        .search-and-button-row { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; /* Space between search and button */
+            margin-bottom: 12px;
+        }
+        .search-container { 
+            position: relative; 
+            width: 100%; /* Allows it to take up the full available space */
+            flex-grow: 1; /* Makes it consume the remaining horizontal space */
+        }
+        
+        /* Plus Button Style */
+        .add-patient-btn-inline {
+            background-color: #28a745; /* Green */
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            font-size: 24px; 
+            font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            flex-shrink: 0; /* Ensures the button doesn't shrink */
+        }
+        .add-patient-btn-inline:hover {
+            background-color: #218838;
+        }
+
         .search-input {
-            width: 100%; padding: 12px 40px 12px 14px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px;
+            width: 100%; /* Must be 100% of its container (search-container) */
+            padding: 12px 40px 12px 14px; 
+            font-size: 16px; 
+            border: 1px solid #ccc; 
+            border-radius: 6px;
             outline:none;
         }
         .search-input:focus {
@@ -120,15 +157,55 @@
     }
 %>
 <%
+    Connection conn = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    String statusUpdateError = null; // Variable to hold update error message
+
+    // --- 🚨 START: FORM SUBMISSION PROCESSOR 🚨 ---
+    String submittedAppointmentIdStr = request.getParameter("appointmentId");
+    String submittedStatus = request.getParameter("status");
+
+    if (submittedAppointmentIdStr != null && submittedStatus != null) {
+        // This block executes when the status form is submitted
+        
+        try {
+            int appointmentId = Integer.parseInt(submittedAppointmentIdStr.trim());
+            
+            Class.forName("com.mysql.jdbc.Driver"); 
+            Connection connUpdate = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS?useSSL=false&serverTimezone=UTC", "root", "root");
+
+            String sql = "UPDATE appointments SET status = ? WHERE id = ?";
+            PreparedStatement psUpdate = connUpdate.prepareStatement(sql);
+            psUpdate.setString(1, submittedStatus.trim());
+            psUpdate.setInt(2, appointmentId);
+
+            int rowsAffected = psUpdate.executeUpdate();
+            
+            psUpdate.close();
+            connUpdate.close();
+
+            if (rowsAffected == 0) {
+                 statusUpdateError = "Error: Appointment ID " + appointmentId + " not found.";
+            }
+
+        } catch (NumberFormatException e) {
+            statusUpdateError = "Error: Invalid appointment ID format.";
+        } catch (Exception e) {
+            statusUpdateError = "Database update failed: " + e.getMessage();
+        }
+    }
+    // --- 🛑 END: FORM SUBMISSION PROCESSOR 🛑 ---
+
+
+    // --- START: NORMAL PAGE RENDERING LOGIC ---
     String fullname = (String) session.getAttribute("fullname");
     if (fullname == null || fullname.isEmpty()) {
         response.sendRedirect("doctorlogin.jsp");
         return;
     }
     String hospitalName = "Unknown Hospital";
-    Connection conn = null;
-    PreparedStatement ps = null;
-    ResultSet rs = null;
+    
     String selectedDateStr = request.getParameter("date");
     if (selectedDateStr == null || selectedDateStr.trim().isEmpty()) {
         selectedDateStr = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
@@ -140,15 +217,20 @@
     } catch(Exception e) {
         displayDate = selectedDateStr;
     }
+    
     try {
         Class.forName("com.mysql.jdbc.Driver");
         conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS?useSSL=false&serverTimezone=UTC", "root", "root");
+        
+        // 1. Get hospital name
         ps = conn.prepareStatement("SELECT hospital_name FROM doctors WHERE LOWER(TRIM(fullname)) = LOWER(TRIM(?))");
         ps.setString(1, fullname);
         rs = ps.executeQuery();
         if (rs.next()) hospitalName = rs.getString("hospital_name");
         rs.close();
         ps.close();
+        
+        // 2. Get all doctor IDs for that hospital
         ps = conn.prepareStatement("SELECT id FROM doctors WHERE hospital_name = ?");
         ps.setString(1, hospitalName);
         rs = ps.executeQuery();
@@ -178,8 +260,7 @@
 <nav class="sidebar" id="sidebar">
     <a href="my_profile.jsp">My Profile</a>
     <a href="doctor_dashboard.jsp">Appointments</a>
-    <a href="#">Patients</a>
-    <a href="#">Prescriptions</a>
+    <a href="add_patient.jsp">Add Patient</a>
     <a href="#">Settings</a>
     <a href="#">About Us</a>
     <a href="#">Contact</a>
@@ -189,11 +270,22 @@
 <div class="dashboard-content">
     <div class="card-box">
         <h2>Appointments for <span id="selectedDate"><%= displayDate %></span></h2>
-        <div class="search-container">
-            <input type="text" placeholder="Search patient name..." class="search-input" id="patientSearch" />
-            <input type="date" id="appointmentDatePicker" class="date-picker" title="Select Date"
-                value="<%= selectedDateStr %>" min="<%= selectedDateStr %>" />
+        
+        <% if (statusUpdateError != null) { %>
+            <p style="color: red; font-weight: bold; margin-bottom: 15px;"><%= statusUpdateError %></p>
+        <% } %>
+
+        <div class="search-and-button-row">
+            <div class="search-container">
+                <input type="text" placeholder="Search patient name..." class="search-input" id="patientSearch" />
+                <input type="date" id="appointmentDatePicker" class="date-picker" title="Select Date"
+                    value="<%= selectedDateStr %>" min="<%= selectedDateStr %>" />
+            </div>
+            <a href="add_patient.jsp" class="add-patient-btn-inline" title="Add New Patient">
+                +
+            </a>
         </div>
+        
         <%
             if (doctorIds.isEmpty()) {
         %>
@@ -205,7 +297,6 @@
                     inClause.append("?");
                     if (i < doctorIds.size() - 1) inClause.append(",");
                 }
-                // Assuming you want to show all times sorted ordered ascending from 10 AM onwards; adjust to 05:40 AM if needed below
                 String sql = "SELECT id, patientName, contactNumber, patientAddress, patientAge, weight, allergies, appointmentTime, status " +
                              "FROM appointments WHERE doctorId IN (" + inClause.toString() + ") AND appointmentDate = ? " +
                              "AND appointmentTime >= '10:00:00' ORDER BY appointmentTime ASC";
@@ -260,11 +351,17 @@
                     <td><%= (allergies != null && !allergies.trim().isEmpty()) ? allergies : "None" %></td>
                     <td><span class="time-box"><%= formattedTime %></span></td>
                     <td>
-                        <select class="status-select" onchange="updateStatus(<%= appointmentId %>, this);">
-                            <option value="Pending" <%= "Pending".equalsIgnoreCase(currentStatus) ? "selected" : "" %>>Pending</option>
-                            <option value="Approved" <%= "Approved".equalsIgnoreCase(currentStatus) ? "selected" : "" %>>Approved</option>
-                            <option value="Cancelled" <%= "Cancelled".equalsIgnoreCase(currentStatus) ? "selected" : "" %>>Cancelled</option>
-                        </select>
+                        <form action="doctor_dashboard.jsp" method="post" style="margin: 0;">
+                            <input type="hidden" name="appointmentId" value="<%= appointmentId %>" />
+                            <input type="hidden" name="date" value="<%= selectedDateStr %>" />
+                            <select class="status-select <%= getStatusClass(currentStatus) %>" 
+                                    name="status" 
+                                    onchange="this.form.submit();">
+                                <option value="Pending" <%= "Pending".equalsIgnoreCase(currentStatus) ? "selected" : "" %>>Pending</option>
+                                <option value="Approved" <%= "Approved".equalsIgnoreCase(currentStatus) ? "selected" : "" %>>Approved</option>
+                                <option value="Cancelled" <%= "Cancelled".equalsIgnoreCase(currentStatus) ? "selected" : "" %>>Cancelled</option>
+                            </select>
+                        </form>
                     </td>
                 </tr>
                 <%
@@ -317,23 +414,6 @@ searchInput.addEventListener('keyup', function(){
         row.style.display = (nameCell && nameCell.textContent.toLowerCase().indexOf(filter) > -1) ? "" : "none";
     });
 });
-
-function updateStatus(appointmentId, selectElem){
-    selectElem.classList.remove("Pending", "Approved", "Cancelled");
-    let selectedVal = selectElem.value;
-    let className = selectedVal.charAt(0).toUpperCase() + selectedVal.slice(1).toLowerCase();
-    selectElem.classList.add(className);
-
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "UpdateAppointmentStatusAjaxServlet", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    xhr.onreadystatechange = function(){
-        if(xhr.readyState === 4 && xhr.status !== 200){
-            alert('Failed to update status.');
-        }
-    };
-    xhr.send("appointmentId=" + appointmentId + "&status=" + encodeURIComponent(selectedVal));
-}
 
 window.onload = function(){
     document.querySelectorAll('select.status-select').forEach(function(sel){
