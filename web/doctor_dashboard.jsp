@@ -212,9 +212,11 @@
     }
     String displayDate = "";
     try {
+        // Use SimpleDateFormat to parse the selected date for display
         java.util.Date dateObj = new SimpleDateFormat("yyyy-MM-dd").parse(selectedDateStr);
         displayDate = new SimpleDateFormat("EEEE, MMMM dd, yyyy").format(dateObj);
     } catch(Exception e) {
+        // Fallback if date parsing fails
         displayDate = selectedDateStr;
     }
     
@@ -279,8 +281,8 @@
             <div class="search-container">
                 <input type="text" placeholder="Search patient name..." class="search-input" id="patientSearch" />
                 <input type="date" id="appointmentDatePicker" class="date-picker" title="Select Date"
-                    value="<%= selectedDateStr %>" min="<%= selectedDateStr %>" />
-            </div>
+                    value="<%= selectedDateStr %>" />
+                    </div>
             <a href="add_patient.jsp" class="add-patient-btn-inline" title="Add New Patient">
                 +
             </a>
@@ -299,7 +301,8 @@
                 }
                 String sql = "SELECT id, patientName, contactNumber, patientAddress, patientAge, weight, allergies, appointmentTime, status " +
                              "FROM appointments WHERE doctorId IN (" + inClause.toString() + ") AND appointmentDate = ? " +
-                             "AND appointmentTime >= '10:00:00' ORDER BY appointmentTime ASC";
+                             // FIX 2: Removed the redundant time constraint (AND appointmentTime >= '10:00:00')
+                             "ORDER BY appointmentTime ASC";
                 ps = conn.prepareStatement(sql);
                 int idx = 1;
                 for (Integer id : doctorIds) ps.setInt(idx++, id);
@@ -355,8 +358,8 @@
                             <input type="hidden" name="appointmentId" value="<%= appointmentId %>" />
                             <input type="hidden" name="date" value="<%= selectedDateStr %>" />
                             <select class="status-select <%= getStatusClass(currentStatus) %>" 
-                                    name="status" 
-                                    onchange="this.form.submit();">
+                                        name="status" 
+                                        onchange="this.form.submit();">
                                 <option value="Pending" <%= "Pending".equalsIgnoreCase(currentStatus) ? "selected" : "" %>>Pending</option>
                                 <option value="Approved" <%= "Approved".equalsIgnoreCase(currentStatus) ? "selected" : "" %>>Approved</option>
                                 <option value="Cancelled" <%= "Cancelled".equalsIgnoreCase(currentStatus) ? "selected" : "" %>>Cancelled</option>
@@ -401,6 +404,7 @@ window.onclick = function(event) {
 };
 document.getElementById('appointmentDatePicker').addEventListener('change', function(){
     const selectedDate = this.value;
+    // Redirects the page with the newly selected date as a query parameter
     let newUrl = window.location.pathname + '?date=' + encodeURIComponent(selectedDate);
     window.location.href = newUrl;
 });
@@ -411,13 +415,16 @@ searchInput.addEventListener('keyup', function(){
     let rows = table.querySelectorAll("tbody tr");
     rows.forEach(function(row){
         let nameCell = row.querySelector(".patient-name");
+        // Check if the patient name cell exists and contains the filter text
         row.style.display = (nameCell && nameCell.textContent.toLowerCase().indexOf(filter) > -1) ? "" : "none";
     });
 });
 
 window.onload = function(){
+    // Apply class for styling the status select based on its initial value
     document.querySelectorAll('select.status-select').forEach(function(sel){
         let val = sel.value;
+        // Capitalize first letter and ensure rest is lowercase (e.g., pending -> Pending)
         let className = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
         sel.classList.add(className);
     });
