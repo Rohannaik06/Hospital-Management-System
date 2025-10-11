@@ -385,6 +385,9 @@
     <a href="userdashbaord.jsp">Home</a>
     <a href="patient_profile.jsp">My Profile</a>
     <a href="#">My Appointments</a>
+    <a href="#">Saved</a>
+    <a href="#">About Us</a>
+    <a href="#">Share</a>
     <a href="patientlogin.jsp" class="logout-link">Logout</a>
 </nav>
 

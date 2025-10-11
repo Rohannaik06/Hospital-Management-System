@@ -179,6 +179,7 @@
             <div class="dropdown-menu" id="dropdownMenu">
                 <a href="my_profile.jsp">My Profile</a>
                 <a href="doctor_dashboard.jsp">Appointments</a>
+                <a href="staff.jsp">Staff</a>
                 <a href="doctorlogin.jsp" class="logout-link">Logout</a>
             </div>
         </div>
@@ -189,10 +190,7 @@
 <nav class="sidebar" id="sidebar">
     <a href="my_profile.jsp">My Profile</a>
     <a href="doctor_dashboard.jsp">Appointments</a>
-    <a href="#">Patients</a>
-    <a href="#">Settings</a>
-    <a href="#">About Us</a>
-    <a href="#">Contact</a>
+    <a href="staff.jsp">Staff</a>
     <a href="doctorlogin.jsp" class="logout-link">Logout</a>
 </nav>
 

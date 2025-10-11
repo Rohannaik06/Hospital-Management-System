@@ -117,7 +117,9 @@
             <div class="profile-photo"><%= profileEmoji %></div>
             <div class="profile-name"><%= fullname %></div>
             <div class="dropdown-menu" id="dropdownMenu">
+                <a href="userdashbaord.jsp">Home</a>
                 <a href="patient_profile.jsp">My Profile</a>
+                <a href="myappointments.jsp">My Appointments</a>
                 <a href="patientlogin.jsp" class="logout-link">Logout</a>
             </div>
         </div>
@@ -125,12 +127,9 @@
 </header>
 
 <nav class="sidebar" id="sidebar">
+    <a href="userdashbaord.jsp">Home</a>
     <a href="patient_profile.jsp">My Profile</a>
-    <a href="#">Saved</a>
-    <a href="#">Settings</a>
-    <a href="#">About Us</a>
-    <a href="#">Contact</a>
-    <a href="#">Share</a>
+    <a href="myappointments.jsp">My Appointments</a>
     <a href="patientlogin.jsp" class="logout-link">Logout</a>
 </nav>
 

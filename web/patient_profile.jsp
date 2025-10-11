@@ -15,14 +15,15 @@
             color: #333;
         }
 
-        /* Header */
+        /* Header (Ensures full width and consistent height via padding) */
         .main-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #0a4275; /* Primary Blue */
             color: white;
-            padding: 16px 30px;
+            padding: 12px 24px; /* Controls Header Height */
+            width: 100%; /* Ensures full width */
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -52,8 +53,16 @@
             display: block; padding: 14px 20px; color: #333; text-decoration: none; font-size: 16px;
         }
         .dropdown-menu a:hover { background: #f5f5f5; }
-        .logout-link { color: #e63946; font-weight: 600; }
-        .logout-link:hover { background: #b22222 !important; color: white !important; }
+        
+        /* LOGOUT COLOR RED for dropdown links */
+        .dropdown-menu .logout-link { 
+            color: #e63946; /* Red color */
+            font-weight: 600; 
+        }
+        .dropdown-menu .logout-link:hover { 
+            background: #b22222 !important; 
+            color: white !important; 
+        }
 
         /* Sidebar */
         .sidebar {
@@ -66,25 +75,40 @@
         }
         .sidebar a:hover { background: #374b68; }
 
+        /* LOGOUT COLOR RED for sidebar links */
+        .sidebar .logout-link {
+            color: #e63946; /* Red color */
+            font-weight: 600;
+        }
+        .sidebar .logout-link:hover {
+            background: #b22222 !important;
+            color: white !important;
+        }
+
         /* Content */
         .dashboard-content {
             margin-left: 0; padding: 36px 48px; transition: margin-left 0.3s ease;
             min-height: calc(100vh - 120px);
+            padding-bottom: 80px; /* Space for fixed footer */
         }
         .sidebar.active ~ .dashboard-content { margin-left: 280px; }
 
-        /* Footer */
+        /* Footer (Ensures full width and consistent height via padding) */
         footer {
-            background: #023e8a; color: white; text-align: center; padding: 18px 10px;
-            font-size: 1rem; position: fixed; width: 100%; bottom: 0; left: 0;
+            background: #023e8a; color: white; text-align: center; 
+            padding: 18px 10px; /* Controls Footer Height */
+            font-size: 1rem; 
+            width: 100%; /* Ensures full width */
+            position: fixed; 
+            bottom: 0; 
+            left: 0;
         }
         footer a { color: #90e0ef; text-decoration: none; }
         footer a:hover { text-decoration: underline; }
 
         @media (max-width: 768px) {
-            .dashboard-content { margin-left: 0 !important; padding: 20px; }
+            .dashboard-content { margin-left: 0 !important; padding: 20px; padding-bottom: 80px; }
             .sidebar { top: 60px; }
-            footer { position: static; }
         }
 
         /* --- PROFILE PAGE STYLES (Doctor Layout Matched) --- */
@@ -133,7 +157,6 @@
         /* Details Grid */
         .profile-details {
             display: grid; 
-            /* Two columns for max width, ensuring proper scaling */
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
             gap: 24px;
         }
@@ -200,7 +223,7 @@
     }
     
     // Variables to hold patient data
-    String patientId = "N/A";
+    String patientId = "N/A"; // Changed from 'id' to 'pid' in DB, so this will hold 'pid'
     String patientFullname = sessionFullname;
     String patientGender = "N/A";
     String patientAddress = "Not Provided";
@@ -216,13 +239,15 @@
         Class.forName("com.mysql.jdbc.Driver");
         conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS?useSSL=false&serverTimezone=UTC", "root", "root");
         
-        String sql = "SELECT id, fullname, gender, address, phone, username, created_at FROM patients WHERE fullname = ?";
+        // **--- MODIFICATION HERE: Changed 'id' to 'pid' in the SELECT statement ---**
+        String sql = "SELECT pid, fullname, gender, address, phone, username, created_at FROM patients WHERE fullname = ?";
         ps = conn.prepareStatement(sql);
         ps.setString(1, sessionFullname);
         rs = ps.executeQuery();
         
         if (rs.next()) {
-            patientId = String.valueOf(rs.getInt("id"));
+            // **--- MODIFICATION HERE: Changed getInt("id") to getInt("pid") ---**
+            patientId = String.valueOf(rs.getInt("pid"));
             patientFullname = rs.getString("fullname");
             patientGender = rs.getString("gender") != null ? rs.getString("gender") : "N/A";
             patientAddress = rs.getString("address") != null ? rs.getString("address") : "Not Provided";
@@ -231,6 +256,7 @@
             
             Timestamp ts = rs.getTimestamp("created_at");
             if (ts != null) {
+                // Formatting timestamp using java.text.SimpleDateFormat
                 patientCreatedAt = new SimpleDateFormat("dd MMMM, yyyy 'at' hh:mm a").format(ts);
             }
 
@@ -244,8 +270,9 @@
         }
         
     } catch (Exception e) {
-        // Log error
+        // In a real application, you would log e.getMessage()
     } finally {
+        // Ensure resources are closed
         try { if(rs!=null) rs.close(); } catch(Exception e) {}
         try { if(ps!=null) ps.close(); } catch(Exception e) {}
         try { if(conn!=null) conn.close(); } catch(Exception e) {}
@@ -263,8 +290,9 @@
             <div class="profile-photo-header"><%= profileEmoji %></div>
             <div class="profile-name-header"><%= patientFullname %></div>
             <div class="dropdown-menu" id="dropdownMenu">
+                <a href="userdashbaord.jsp">Home</a>
                 <a href="patient_profile.jsp">My Profile</a>
-                <a href="userdashbaord.jsp">Dashboard</a>
+                <a href="myappointments.jsp">My Appointments</a>
                 <a href="patientlogin.jsp" class="logout-link">Logout</a>
             </div>
         </div>
@@ -272,10 +300,9 @@
 </header>
 
 <nav class="sidebar" id="sidebar">
-    <a href="userdashbaord.jsp">Dashboard</a>
+    <a href="userdashbaord.jsp">Home</a>
     <a href="patient_profile.jsp">My Profile</a>
-    <a href="#">Appointments</a>
-    <a href="#">Medical Records</a>
+    <a href="myappointments.jsp">My Appointments</a>
     <a href="patientlogin.jsp" class="logout-link">Logout</a>
 </nav>
 
