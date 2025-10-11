@@ -32,37 +32,25 @@
         .sidebar a.logout-link:hover, .dropdown-menu a.logout-link:hover { background-color: #b22222; color: white; }
         .dashboard-content { margin-left: 0; padding: 30px 40px; transition: margin-left 0.3s ease; min-height: calc(100vh - 60px - 60px); }
         .sidebar.active ~ .dashboard-content { margin-left: 240px; }
-        footer { background: #0a4275; color: white; padding: 16px 42px; text-align: center; font-size: 14px; position: relative; bottom: 0; width: 100%; box-sizing: border-box; box-shadow: 0 -2px 6px rgba(0,0,0,0.15); margin-top: 40px; }
+        footer { background: #0a4275; color: white; padding: 16px 42px; text-align: center; font-size: 14px; width: 100%; box-sizing: border-box; box-shadow: 0 -2px 6px rgba(0,0,0,0.15); margin-top: 40px; }
         footer a { color: #8ecae6; text-decoration: none; margin: 0 8px; font-weight: 500; }
         footer a:hover { text-decoration: underline; }
         @media screen and (max-width: 768px) {
-             .dashboard-content { padding: 20px }
-             footer { font-size: 12px; padding: 12px 20px; }
+              .dashboard-content { padding: 20px }
+              footer { font-size: 12px; padding: 12px 20px; }
         }
         /* --- Original Styles for Appointment Form --- */
         .form-container {
             background: white;
             max-width: 500px;
-            margin: auto; /* Changed from 'auto' to ensure it centers within the dashboard-content */
+            margin: auto;
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
-        h2 {
-            text-align: center;
-            color: #0466c8;
-            margin-bottom: 25px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-        label.required::after {
-            content: " *";
-            color: red;
-        }
+        h2 { text-align: center; color: #0466c8; margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        label.required::after { content: " *"; color: red; }
         input[type="text"], input[type="number"], input[type="date"], input[type="time"], textarea {
             width: 100%;
             padding: 10px;
@@ -73,11 +61,7 @@
             color: #333;
             box-sizing: border-box;
         }
-        textarea {
-            resize: vertical;
-            min-height: 50px;
-            max-height: 80px;
-        }
+        textarea { resize: vertical; min-height: 50px; max-height: 80px; }
         input[type="submit"] {
             background-color: #0466c8;
             color: white;
@@ -89,27 +73,11 @@
             width: 100%;
             font-weight: 600;
         }
-        input[type="submit"]:hover {
-            background-color: #024a7a;
-        }
-        .info-text {
-            margin-bottom: 20px;
-            font-style: italic;
-            color: #555;
-            text-align: center;
-        }
-        .message {
-            text-align: center;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .success {
-            color: green;
-        }
-        .error {
-            color: red;
-        }
-        /* New styles for booked slots display */
+        input[type="submit"]:hover { background-color: #024a7a; }
+        .info-text { margin-bottom: 20px; font-style: italic; color: #555; text-align: center; }
+        .message { text-align: center; margin-bottom: 15px; font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
         #bookedSlotsContainer {
             margin-top: 5px;
             margin-bottom: 15px;
@@ -132,54 +100,49 @@
 <body>
 
 <%
-    // --- START: HEADER LOGIC ---
+    // --- START: HEADER AND PATIENT ID LOGIC ---
     String fullname = (String) session.getAttribute("fullname");
     String profileEmoji = "👤";
-    String gender = "";
-    
+    // MODIFICATION: Added variable to store patient ID
+    int patientId = 0; 
+
     // Check for login status
     if (fullname == null || fullname.isEmpty()) {
-        // response.sendRedirect("patientlogin.jsp"); // Uncomment this line when deploying
-        fullname = "Guest User"; // Placeholder for demonstration
+        response.sendRedirect("patientlogin.jsp");
+        return; 
     }
 
-    // Database logic to fetch gender/emoji (Retained from userdashboard for completeness)
     Connection conn = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
     try {
+        // MODIFICATION: Use the modern driver class name
         Class.forName("com.mysql.jdbc.Driver");
-        conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS?useSSL=false&serverTimezone=UTC", "root", "root");
-        String sql = "SELECT gender FROM patients WHERE fullname = ?";
+        conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
+        
+        // MODIFICATION: Fetch both pid and gender
+        String sql = "SELECT pid, gender FROM patients WHERE fullname = ?";
         ps = conn.prepareStatement(sql);
         ps.setString(1, fullname);
         rs = ps.executeQuery();
         if (rs.next()) {
-            gender = rs.getString("gender");
-            if ("male".equalsIgnoreCase(gender)) {
-                profileEmoji = "👨";
-            } else if ("female".equalsIgnoreCase(gender)) {
-                profileEmoji = "👩";
-            } else {
-                profileEmoji = "🧑";
-            }
+            // MODIFICATION: Store the patient's ID
+            patientId = rs.getInt("pid"); 
+            String gender = rs.getString("gender");
+            if ("male".equalsIgnoreCase(gender)) profileEmoji = "👨";
+            else if ("female".equalsIgnoreCase(gender)) profileEmoji = "👩";
+            else profileEmoji = "🧑";
         }
     } catch (Exception e) {
-        // Silently fail if DB connection for emoji fails
+        System.err.println("Header DB Error: " + e.getMessage());
+        e.printStackTrace();
     } finally {
-        try { if (rs != null) rs.close(); } catch (Exception e) {}
-        try { if (ps != null) ps.close(); } catch (Exception e) {}
-        // DO NOT CLOSE conn YET, as we might need it for the main form logic later
-        // It will be closed in the main form logic's finally block, or immediately if we're done here.
-        if (conn != null) {
-            try { conn.close(); } catch (Exception e) {}
-            conn = null;
-        }
+        if (rs != null) try { rs.close(); } catch (SQLException e) {}
+        if (ps != null) try { ps.close(); } catch (SQLException e) {}
+        if (conn != null) try { conn.close(); } catch (SQLException e) {}
     }
-    // --- END: HEADER LOGIC ---
+    // --- END: HEADER AND PATIENT ID LOGIC ---
 
-    // --- START: ORIGINAL APPOINTMENT LOGIC ---
-    // The existing logic from appointment.jsp starts here.
     final int SLOT_DURATION_MINUTES = 15;
     String doctorIdParam = request.getParameter("doctorId");
     int doctorId = 0;
@@ -191,7 +154,7 @@
         try {
             doctorId = Integer.parseInt(doctorIdParam);
         } catch (NumberFormatException e) {
-            // doctorId remains 0
+            doctorId = 0;
         }
     }
 
@@ -204,9 +167,7 @@
     String message = "";
     String messageClass = "";
     boolean isPost = "POST".equalsIgnoreCase(request.getMethod()) && !isAjax; 
-    boolean showPopup = false;
 
-    // Retain form data on error
     String patientName = "";
     String contactNumber = "";
     String patientAddress = "";
@@ -218,48 +179,41 @@
 
     // --- LOGIC FOR FETCHING BOOKED TIMES (AJAX REQUEST) ---
     if (isAjax) {
-        // Reopen DB connection for AJAX
+        Connection ajaxConn = null;
+        PreparedStatement ajaxPs = null;
+        ResultSet ajaxRs = null;
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
+            ajaxConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
 
             String sql = "SELECT appointmentTime FROM appointments WHERE doctorId = ? AND appointmentDate = ? AND status != 'Cancelled' ORDER BY appointmentTime";
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, doctorId);
-            ps.setString(2, fetchDate);
-            rs = ps.executeQuery();
+            ajaxPs = ajaxConn.prepareStatement(sql);
+            ajaxPs.setInt(1, doctorId);
+            ajaxPs.setString(2, fetchDate);
+            ajaxRs = ajaxPs.executeQuery();
             
             StringBuilder bookedTimes = new StringBuilder();
-            while (rs.next()) {
-                if (bookedTimes.length() > 0) {
-                    bookedTimes.append(",");
-                }
-                bookedTimes.append(new SimpleDateFormat("HH:mm").format(rs.getTime("appointmentTime")));
+            while (ajaxRs.next()) {
+                if (bookedTimes.length() > 0) bookedTimes.append(",");
+                bookedTimes.append(new SimpleDateFormat("HH:mm").format(ajaxRs.getTime("appointmentTime")));
             }
             
             out.clearBuffer();
             out.print(bookedTimes.toString());
             return; 
-
         } catch (Exception e) {
             out.clearBuffer();
             out.print("");
             return;
         } finally {
-            try { if (rs != null) rs.close(); } catch (Exception e) {}
-            try { if (ps != null) ps.close(); } catch (Exception e) {}
-            try { if (conn != null) conn.close(); } catch (Exception e) {}
+            if (ajaxRs != null) try { ajaxRs.close(); } catch (SQLException e) {}
+            if (ajaxPs != null) try { ajaxPs.close(); } catch (SQLException e) {}
+            if (ajaxConn != null) try { ajaxConn.close(); } catch (SQLException e) {}
         }
     }
 
     // --- LOGIC FOR FORM SUBMISSION (POST REQUEST) ---
     if (isPost) {
-        // Re-read and sanitize form data
-        String doctorIdStr = request.getParameter("doctorId");
-        if (doctorIdStr != null) {
-            try { doctorId = Integer.parseInt(doctorIdStr); } catch (NumberFormatException e) { doctorId = 0; }
-        }
-
         patientName = request.getParameter("patientName") != null ? request.getParameter("patientName").trim() : "";
         contactNumber = request.getParameter("contactNumber") != null ? request.getParameter("contactNumber").trim() : "";
         patientAddress = request.getParameter("patientAddress") != null ? request.getParameter("patientAddress").trim() : "";
@@ -269,97 +223,83 @@
         appointmentDate = request.getParameter("appointmentDate") != null ? request.getParameter("appointmentDate").trim() : "";
         appointmentTime = request.getParameter("appointmentTime") != null ? request.getParameter("appointmentTime").trim() : "";
 
-        if (doctorId == 0 || patientName.isEmpty() || contactNumber.isEmpty() || patientAddress.isEmpty() ||
+        // MODIFICATION: Added validation check for patientId
+        if (patientId == 0) {
+            message = "Error: Could not identify the logged-in patient. Please log out and try again.";
+            messageClass = "error";
+        } else if (doctorId == 0 || patientName.isEmpty() || contactNumber.isEmpty() || patientAddress.isEmpty() ||
             patientAge.isEmpty() || appointmentDate.isEmpty() || appointmentTime.isEmpty()) {
-            message = "Please fill in all required fields and ensure Doctor ID is valid.";
+            message = "Please fill in all required fields.";
             messageClass = "error";
         } else {
-            // Reopen DB connection for POST
+            Connection postConn = null;
+            PreparedStatement postPs = null;
+            ResultSet postRs = null;
             try {
                 Class.forName("com.mysql.jdbc.Driver");
-                conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
-                boolean clashFound = false;
-
-                // --- 1. TIME CLASH VALIDATION CHECK (ENFORCING 15-MIN SLOT) ---
+                postConn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
                 
-                LocalTime requestedTime = LocalTime.parse(appointmentTime);
-                String startTime = requestedTime.toString();
-                String endTime = requestedTime.plusMinutes(SLOT_DURATION_MINUTES).toString(); 
-                
-                // Simplified query that works if everyone has 15-min slots:
-                String simpleOverlapCheck = 
-                    "SELECT COUNT(*) FROM appointments WHERE doctorId = ? AND appointmentDate = ? AND status != 'Cancelled' AND (" +
-                    "   TIME(?) < ADDTIME(appointmentTime, '00:15:00') AND TIME(?) >= appointmentTime" +
-                    ")";
-
-
-                PreparedStatement checkPs = conn.prepareStatement(simpleOverlapCheck);
+                String clashCheckSql = "SELECT COUNT(*) FROM appointments WHERE doctorId = ? AND appointmentDate = ? AND status != 'Cancelled' AND TIME(?) = appointmentTime";
+                PreparedStatement checkPs = postConn.prepareStatement(clashCheckSql);
                 checkPs.setInt(1, doctorId);
                 checkPs.setDate(2, java.sql.Date.valueOf(appointmentDate));
-                checkPs.setTime(3, java.sql.Time.valueOf(startTime + ":00")); // User's requested START time
-                checkPs.setTime(4, java.sql.Time.valueOf(endTime + ":00"));   // User's requested END time
+                checkPs.setTime(3, java.sql.Time.valueOf(appointmentTime + ":00"));
+                postRs = checkPs.executeQuery();
                 
-                rs = checkPs.executeQuery();
-                
-                if (rs.next() && rs.getInt(1) > 0) {
+                boolean clashFound = false;
+                if (postRs.next() && postRs.getInt(1) > 0) {
                     clashFound = true;
-                    message = "The time " + appointmentTime + " clashes with an existing 15-minute appointment slot. Please choose a different time, preferably a 15-minute interval.";
+                    message = "The selected time slot is already booked. Please choose a different time.";
                     messageClass = "error";
                 }
-                rs.close();
+                postRs.close();
                 checkPs.close();
-                // -----------------------------------------------------------------
 
                 if (!clashFound) {
-                    // 2. --- INSERT APPOINTMENT ---
-                    String insertSql = "INSERT INTO appointments (doctorId, patientName, contactNumber, patientAddress, patientAge, weight, allergies, appointmentDate, appointmentTime, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-                    ps = conn.prepareStatement(insertSql);
-                    ps.setInt(1, doctorId);
-                    ps.setString(2, patientName);
-                    ps.setString(3, contactNumber);
-                    ps.setString(4, patientAddress);
-                    ps.setInt(5, Integer.parseInt(patientAge));
+                    // MODIFICATION: Added patientId and appointmentDuration to the INSERT statement
+                    String insertSql = "INSERT INTO appointments (doctorId, patientId, patientName, contactNumber, patientAddress, patientAge, weight, allergies, appointmentDate, appointmentTime, appointmentDuration, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                    postPs = postConn.prepareStatement(insertSql);
 
-                    if (weight.isEmpty()) {
-                        ps.setNull(6, java.sql.Types.DECIMAL);
-                    } else {
-                        ps.setBigDecimal(6, new java.math.BigDecimal(weight));
-                    }
+                    // MODIFICATION: Set all parameters with correct indices
+                    postPs.setInt(1, doctorId);
+                    postPs.setInt(2, patientId); // SETTING THE PATIENT ID
+                    postPs.setString(3, patientName);
+                    postPs.setString(4, contactNumber);
+                    postPs.setString(5, patientAddress);
+                    postPs.setInt(6, Integer.parseInt(patientAge));
 
-                    if (allergies.isEmpty()) {
-                        ps.setNull(7, java.sql.Types.LONGVARCHAR);
-                    } else {
-                        ps.setString(7, allergies);
-                    }
+                    if (weight.isEmpty()) postPs.setNull(7, java.sql.Types.DECIMAL);
+                    else postPs.setBigDecimal(7, new java.math.BigDecimal(weight));
 
-                    ps.setDate(8, java.sql.Date.valueOf(appointmentDate));
-                    ps.setTime(9, java.sql.Time.valueOf(appointmentTime + ":00")); 
+                    if (allergies.isEmpty()) postPs.setNull(8, java.sql.Types.LONGVARCHAR);
+                    else postPs.setString(8, allergies);
 
-                    int result = ps.executeUpdate();
+                    postPs.setDate(9, java.sql.Date.valueOf(appointmentDate));
+                    postPs.setTime(10, java.sql.Time.valueOf(appointmentTime + ":00"));
+                    postPs.setInt(11, SLOT_DURATION_MINUTES); // SETTING THE DURATION
+
+                    int result = postPs.executeUpdate();
                     if (result > 0) {
                         message = "Appointment booked successfully!";
                         messageClass = "success";
-                        showPopup = true; 
-                        // Clear fields upon success
                         patientName = contactNumber = patientAddress = patientAge = weight = allergies = appointmentDate = appointmentTime = "";
                     } else {
                         message = "Failed to book the appointment. Please try again.";
                         messageClass = "error";
                     }
                 }
-
             } catch (Exception e) {
-                System.err.println("Database Error: " + e.getMessage()); // Log error on server console
+                System.err.println("Database Error on POST: " + e.getMessage());
                 message = "An internal server error occurred. Please try again."; 
                 messageClass = "error";
+                e.printStackTrace();
             } finally {
-                try { if (rs != null) rs.close(); } catch (Exception e) {}
-                try { if (ps != null) ps.close(); } catch (Exception e) {}
-                try { if (conn != null) conn.close(); } catch (Exception e) {}
+                if (postRs != null) try { postRs.close(); } catch (SQLException e) {}
+                if (postPs != null) try { postPs.close(); } catch (SQLException e) {}
+                if (postConn != null) try { postConn.close(); } catch (SQLException e) {}
             }
         }
     }
-    // --- END: ORIGINAL APPOINTMENT LOGIC ---
 %>
 
 <header class="main-header">
@@ -386,7 +326,7 @@
     <a href="patient_profile.jsp">My Profile</a>
     <a href="#">My Appointments</a>
     <a href="patientlogin.jsp" class="logout-link">Logout</a>
-</nav>
+</nav> 
 
 <div class="dashboard-content">
     <div class="form-container">
@@ -400,7 +340,7 @@
             <div class="message <%= messageClass %>"><%= message %></div>
         <% } %>
 
-        <form method="post" action="appointment.jsp?doctorId=<%= doctorId %>&hospitalName=<%= hospitalName %>&doctorName=<%= doctorName %>">
+        <form method="post" action="appointment.jsp?doctorId=<%= doctorId %>&hospitalName=<%= java.net.URLEncoder.encode(hospitalName != null ? hospitalName : "", "UTF-8") %>&doctorName=<%= java.net.URLEncoder.encode(doctorName != null ? doctorName : "", "UTF-8") %>">
             <input type="hidden" name="doctorId" value="<%= doctorId %>" />
 
             <label for="patientName" class="required">Patient Name:</label>
@@ -425,9 +365,8 @@
             <input type="date" name="appointmentDate" id="appointmentDate" required min="<%= new SimpleDateFormat("yyyy-MM-dd").format(new Date()) %>" value="<%= appointmentDate %>" />
 
             <div id="bookedSlotsContainer" style="display:none;">
-                <p><strong>Booked Slots (Each slot is ~<%= SLOT_DURATION_MINUTES %> minutes):</strong></p>
+                <p><strong>Booked Slots on this Day:</strong></p>
                 <div class="booked-slots" id="bookedSlotsDisplay"></div>
-                <small style="color:#a00; font-weight:bold;">Please choose a time that does not fall within the <%= SLOT_DURATION_MINUTES %>-minute duration of any listed slot.</small>
             </div>
 
             <label for="appointmentTime" class="required">Appointment Time (HH:MM):</label>
@@ -439,29 +378,25 @@
 </div>
 
 <footer>
-    &copy; 2025 Health Portal. All rights reserved. | <a href="/privacy-policy.html">Privacy Policy</a> | <a href="/contact.html">Contact Us</a>
+    &copy; <%= new SimpleDateFormat("yyyy").format(new Date()) %> Health Portal. All rights reserved. | <a href="/privacy-policy.html">Privacy Policy</a> | <a href="/contact.html">Contact Us</a>
 </footer>
     
 <script>
-    // Toggles the side menu
     document.getElementById("menuToggle").addEventListener("click", function () {
         document.getElementById("sidebar").classList.toggle("active");
     });
 
-    // Toggles the profile dropdown menu
     function toggleDropdown() {
         const menu = document.getElementById("dropdownMenu");
         menu.style.display = (menu.style.display === "block") ? "none" : "block";
     }
 
-    // Closes the dropdown when clicking outside
     window.onclick = function (event) {
         if (!event.target.closest('.profile-dropdown')) {
             document.getElementById("dropdownMenu").style.display = "none";
         }
     };
 
-    // Original AJAX logic for fetching booked times
     document.addEventListener('DOMContentLoaded', function() {
         const dateInput = document.getElementById('appointmentDate');
         const doctorId = document.querySelector('input[name="doctorId"]').value;
@@ -474,35 +409,25 @@
                 bookedSlotsContainer.style.display = 'none';
                 return;
             }
-
-            // Append the original query string to maintain doctor/hospital context
-            const originalQuery = window.location.search.substring(1);
-            const url = 'appointment.jsp?' + originalQuery + '&fetchDate=' + selectedDate;
-
+            const url = `appointment.jsp?doctorId=${doctorId}&fetchDate=${selectedDate}`;
             fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
+                .then(response => response.ok ? response.text() : Promise.reject('Network response was not ok'))
                 .then(text => {
                     bookedSlotsDisplay.innerHTML = '';
-                    if (text.trim() === "" || text.trim() === "0") {
-                        bookedSlotsDisplay.innerHTML = 'None booked yet for this date. Go ahead and choose a time!';
-                        bookedSlotsContainer.style.display = 'block';
+                    if (!text.trim()) {
+                        bookedSlotsDisplay.innerHTML = '<span>None booked yet for this date. Go ahead and choose a time!</span>';
                     } else {
-                        const bookedTimesArray = text.split(',');
-                        bookedTimesArray.forEach(time => {
+                        text.split(',').forEach(time => {
                             const span = document.createElement('span');
                             span.textContent = time;
                             span.style.padding = '3px 6px';
-                            span.style.border = '1px solid #ff6f00';
-                            span.style.borderRadius = '3px';
+                            span.style.background = '#ffe0b2';
+                            span.style.border = '1px solid #ff9800';
+                            span.style.borderRadius = '4px';
                             bookedSlotsDisplay.appendChild(span);
                         });
-                        bookedSlotsContainer.style.display = 'block';
                     }
+                    bookedSlotsContainer.style.display = 'block';
                 })
                 .catch(error => {
                     console.error('Fetch error:', error);
@@ -510,10 +435,7 @@
                     bookedSlotsContainer.style.display = 'block';
                 });
         }
-
         dateInput.addEventListener('change', fetchBookedTimes);
-
-        // Check if the date field was pre-filled (e.g., after an error on post)
         if (dateInput.value) {
             fetchBookedTimes();
         }

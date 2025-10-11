@@ -1,6 +1,4 @@
 <%@ page import="java.sql.*" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.List" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
@@ -63,47 +61,41 @@
         
         /* Staff-specific styles */
         .card-box {
-            width: 90%; background:#fff; border-radius:10px; padding:20px 25px; margin: 0 auto 30px auto;
+            width: 95%; background:#fff; border-radius:10px; padding:20px 25px; margin: 0 auto 30px auto;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative;
         }
-        /* Flex container for the heading and button */
         .card-header {
             display: flex;
-            justify-content: space-between; /* Pushes the button to the right */
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
         .card-header h2 { 
             font-size: 18px; 
-            margin-bottom: 0; /* Remove default h2 margin */
+            margin-bottom: 0;
             color:#222; 
         }
-        /* Style for the new add staff button */
         .add-staff-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 35px;
-            height: 35px;
-            background-color: #28a745; /* Green color for 'add' */
-            color: white;
-            border-radius: 50%; /* Makes it a circle */
-            text-decoration: none;
-            font-size: 24px;
-            font-weight: 700;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: background-color 0.2s;
+            display: flex; align-items: center; justify-content: center; width: 35px; height: 35px; background-color: #28a745;
+            color: white; border-radius: 50%; text-decoration: none; font-size: 24px; font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: background-color 0.2s;
         }
-        .add-staff-button:hover {
-            background-color: #218838;
-        }
+        .add-staff-button:hover { background-color: #218838; }
         table {
             width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff;
             border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         table thead { background-color: #0a4275; color:white; }
-        table th, table td { padding: 12px 16px; border-bottom: 1px solid #ddd; text-align:left; }
+        table th, table td { padding: 12px 16px; border-bottom: 1px solid #ddd; text-align:left; vertical-align: middle; }
         table tbody tr:hover { background-color: #f5f5f5; }
+
+        /* Style for the delete button */
+        .delete-btn {
+            display: inline-block; padding: 6px 12px; font-size: 14px; font-weight: 500; color: white;
+            background-color: #e63946; border: none; border-radius: 5px; text-decoration: none;
+            cursor: pointer; transition: background-color 0.2s;
+        }
+        .delete-btn:hover { background-color: #c12a36; }
     </style>
 </head>
 <body>
@@ -111,28 +103,29 @@
     Connection conn = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
-    String fullname = (String) session.getAttribute("fullname");
-    if (fullname == null || fullname.isEmpty()) {
+    // NOTE: Assuming doctor's full name is stored in session to find their hospital
+    String doctorFullname = (String) session.getAttribute("fullname");
+    if (doctorFullname == null || doctorFullname.isEmpty()) {
         response.sendRedirect("doctorlogin.jsp");
         return;
     }
     String hospitalName = "Unknown Hospital";
     try {
-        // I also added a check for the MySQL driver to be safe, although you had it.
+        // Use the modern driver class name for MySQL 8+
         Class.forName("com.mysql.jdbc.Driver");
         conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS?useSSL=false&serverTimezone=UTC", "root", "root");
         
-        // 1. Get hospital name for header display
+        // 1. Get the logged-in doctor's hospital name
         ps = conn.prepareStatement("SELECT hospital_name FROM doctors WHERE LOWER(TRIM(fullname)) = LOWER(TRIM(?))");
-        ps.setString(1, fullname);
+        ps.setString(1, doctorFullname);
         rs = ps.executeQuery();
         if (rs.next()) {
             hospitalName = rs.getString("hospital_name");
         }
         rs.close(); ps.close();
         
-        // 2. Get staff information for the hospital, ORDERED BY staff_id for sequential display
-        // Note: staff_id is still retrieved but will not be displayed in the first column.
+        // 2. Get all staff for that specific hospital
+        // Corrected SQL to match your new schema
         String staffSql = "SELECT staff_id, fullname, role, specialization, qualification, experience, phone, email, hire_date, salary " +
                           "FROM staff WHERE hospital_name=? ORDER BY staff_id ASC";
         
@@ -148,7 +141,7 @@
     <div class="right-section">
         <div class="profile-dropdown" onclick="toggleDropdown()">
             <div class="profile-photo">👨‍⚕️</div>
-            <div class="profile-name"><%= fullname %></div>
+            <div class="profile-name"><%= doctorFullname %></div>
             <div class="dropdown-menu" id="dropdownMenu">
                 <a href="my_profile.jsp">My Profile</a>
                 <a href="doctor_dashboard.jsp">Appointments</a>
@@ -180,17 +173,16 @@
                     <th>Role</th>
                     <th>Specialization</th>
                     <th>Qualification</th>
-                    <th>Experience (Years)</th>
+                    <th>Experience</th>
                     <th>Phone</th>
                     <th>Email</th>
                     <th>Hire Date</th>
                     <th>Salary</th>
-                </tr>
+                    <th>Actions</th> </tr>
             </thead>
             <tbody>
             <%
                 boolean hasStaff = false;
-                // VARIABLE ADDED: Initialize a counter for the serial number
                 int serialNo = 1; 
                 while (rs.next()) {
                     hasStaff = true;
@@ -201,42 +193,45 @@
                     <td><%= rs.getString("role") %></td>
                     <td><%= rs.getString("specialization") %></td>
                     <td><%= rs.getString("qualification") %></td>
-                    <td><%= rs.getInt("experience") %></td>
+                    <td><%= rs.getInt("experience") %> years</td>
                     <td><%= rs.getString("phone") %></td>
                     <td><%= rs.getString("email") %></td>
                     <td><%= rs.getDate("hire_date") %></td>
                     <td><%= rs.getBigDecimal("salary") %></td>
+                    <td>
+                        <a href="delete_staff.jsp?id=<%= rs.getInt("staff_id") %>" 
+                           class="delete-btn" 
+                           onclick="return confirm('Are you sure you want to delete this staff member? This action cannot be undone.');">Delete</a>
+                    </td>
                 </tr>
             <%
                 }
                 if(!hasStaff) {
             %>
                 <tr>
-                    <td colspan="10" style="text-align:center;">No staff records found for this hospital.</td>
+                    <td colspan="11" style="text-align:center;">No staff records found for this hospital.</td>
                 </tr>
             <%
                 }
             %>
             </tbody>
         </table>
-        </div>
+    </div>
 </div>
 <%
-        // Close resources
-        try { if(rs!=null) rs.close(); } catch(Exception e) {}
-        try { if(ps!=null) ps.close(); } catch(Exception e) {}
     } catch (Exception e) {
 %>
     <div class="dashboard-content">
         <div class="card-box">
             <h2>Error Loading Staff</h2>
-            <div style="color: red;">Failed to fetch staff records: <%= e.getMessage() %></div>
+            <div style="color: red; white-space: pre-wrap;"><%= e.getMessage() %></div>
         </div>
     </div>
 <%
     } finally {
-        // Final close resources
-        try { if(conn!=null) conn.close(); } catch(Exception e) {}
+        if (rs != null) try { rs.close(); } catch (SQLException e) {}
+        if (ps != null) try { ps.close(); } catch (SQLException e) {}
+        if (conn != null) try { conn.close(); } catch (SQLException e) {}
     }
 %>
 <footer>
