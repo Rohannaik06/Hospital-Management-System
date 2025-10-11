@@ -314,7 +314,7 @@
             <div class="dropdown-menu" id="dropdownMenu">
                 <a href="userdashbaord.jsp">Home</a>
                 <a href="patient_profile.jsp">My Profile</a>
-                <a href="#">My Appointments</a>
+                <a href="myappointments.jsp">My Appointments</a>
                 <a href="patientlogin.jsp" class="logout-link">Logout</a>
             </div>
         </div>
@@ -324,7 +324,7 @@
 <nav class="sidebar" id="sidebar">
     <a href="userdashbaord.jsp">Home</a>
     <a href="patient_profile.jsp">My Profile</a>
-    <a href="#">My Appointments</a>
+    <a href="myappointments.jsp">My Appointments</a>
     <a href="patientlogin.jsp" class="logout-link">Logout</a>
 </nav> 
 
