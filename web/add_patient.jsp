@@ -247,6 +247,7 @@
             <div class="dropdown-menu" id="dropdownMenu">
                 <a href="my_profile.jsp">My Profile</a>
                 <a href="doctor_dashboard.jsp">Appointments</a>
+                <a href="staff.jsp">Staff</a> 
                 <a href="doctorlogin.jsp" class="logout-link">Logout</a>
             </div>
         </div>
