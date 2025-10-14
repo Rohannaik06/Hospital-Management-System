@@ -28,7 +28,7 @@
     <meta charset="UTF-8">
     <title>My Appointments</title>
     <style>
-        /* All CSS styles remain the same. No changes are needed. */
+        /* Base and unchanged styles */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; color: #333; }
         .main-header { display: flex; justify-content: space-between; align-items: center; background: #0a4275; color: white; padding: 12px 24px; width: 100%; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -50,9 +50,29 @@
         .sidebar a:hover { background: #374b68; }
         .sidebar .logout-link { color: #e63946; font-weight: 600; }
         .sidebar .logout-link:hover { background: #b22222 !important; color: white !important; }
-        .dashboard-content { margin-left: 0; padding: 36px 48px; transition: margin-left 0.3s ease; min-height: calc(100vh - 120px); padding-bottom: 80px; }
+        
+        /* MODIFIED: Content Area */
+        .dashboard-content { 
+            margin-left: 0; 
+            padding: 36px 48px; 
+            transition: margin-left 0.3s ease; 
+            min-height: calc(100vh - 70px); /* Pushes footer down on short pages */
+            padding-bottom: 40px; 
+        }
         .sidebar.active ~ .dashboard-content { margin-left: 280px; }
-        footer { background: #023e8a; color: white; text-align: center; padding: 18px 10px; font-size: 1rem; width: 100%; position: fixed; bottom: 0; left: 0; }
+
+        /* MODIFIED: Footer */
+        footer { 
+            background: #023e8a; 
+            color: white; 
+            text-align: center; 
+            padding: 18px 10px; 
+            font-size: 1rem; 
+            width: 100%; 
+            /* REMOVED position, bottom, left properties */
+        }
+
+        /* Appointments page specific styles - Unchanged */
         .appointments-container { max-width: 1200px; margin: 20px auto; background: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .appointments-container h1 { color: #0a4275; margin-bottom: 25px; font-size: 28px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
         .appointments-container h2 { font-size: 22px; color: #0077b6; margin-top: 40px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ddd; }
@@ -74,6 +94,7 @@
 <body>
 
 <%
+    // --- JSP Logic - Unchanged ---
     String sessionFullname = (String) session.getAttribute("fullname");
     if (sessionFullname == null || sessionFullname.isEmpty()) {
         response.sendRedirect("patientlogin.jsp");
@@ -90,7 +111,6 @@
         Class.forName("com.mysql.jdbc.Driver");
         conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS?useSSL=false&serverTimezone=UTC", "root", "root");
 
-        // Cancellation logic
         if ("POST".equalsIgnoreCase(request.getMethod())) {
             String appointmentIdToCancel = request.getParameter("cancel_id");
             if (appointmentIdToCancel != null && !appointmentIdToCancel.isEmpty()) {
@@ -105,7 +125,6 @@
             }
         }
 
-        // Fetch patient ID and gender
         String patientSql = "SELECT pid, gender FROM patients WHERE fullname = ?";
         try (PreparedStatement ps = conn.prepareStatement(patientSql)) {
             ps.setString(1, sessionFullname);
@@ -120,17 +139,10 @@
         }
 
         if (patientId != -1) {
-            String appointmentsSql = "SELECT " +
-                                     "a.id, " +
-                                     "d.fullname AS doctor_name, " +
-                                     "d.specialization AS doctor_specialization, " +
-                                     "a.patientName, " +
-                                     "a.status, " +
-                                     "CONCAT(a.appointmentDate, ' ', a.appointmentTime) AS full_appointment_date " +
-                                     "FROM appointments a " +
-                                     "JOIN doctors d ON a.doctorId = d.id " +
-                                     "WHERE a.patientId = ? " +
-                                     "ORDER BY full_appointment_date DESC";
+            String appointmentsSql = "SELECT a.id, d.fullname AS doctor_name, d.specialization AS doctor_specialization, " +
+                                     "a.patientName, a.status, CONCAT(a.appointmentDate, ' ', a.appointmentTime) AS full_appointment_date " +
+                                     "FROM appointments a JOIN doctors d ON a.doctorId = d.id " +
+                                     "WHERE a.patientId = ? ORDER BY full_appointment_date DESC";
 
             try (PreparedStatement ps = conn.prepareStatement(appointmentsSql)) {
                 ps.setInt(1, patientId);
@@ -156,7 +168,6 @@
                 }
             }
         }
-
     } catch (Exception e) {
         // e.printStackTrace(); 
     } finally {
@@ -227,7 +238,7 @@
                     </td>
                 </tr>
             <%  }
-               } %>
+                } %>
             </tbody>
         </table>
 
@@ -245,22 +256,13 @@
             <% if (historicalAppointments.isEmpty()) { %>
                 <tr><td colspan="4" class="no-appointments">You have no past appointments.</td></tr>
             <% } else {
-                // *** THIS IS THE CORRECTED CODE BLOCK ***
-                // Sorting history to show the most recent first using Java 7 compatible syntax
+                // Sorting logic is unchanged
                 Collections.sort(historicalAppointments, new Comparator<Appointment>() {
                     @Override
                     public int compare(Appointment o1, Appointment o2) {
-                        // Handle nulls to place them at the end
-                        if (o1.appointmentDate == null && o2.appointmentDate == null) {
-                            return 0;
-                        }
-                        if (o1.appointmentDate == null) {
-                            return 1; // o1 is null, it should come after o2
-                        }
-                        if (o2.appointmentDate == null) {
-                            return -1; // o2 is null, it should come after o1
-                        }
-                        // Reverse order: compare o2 to o1 for descending sort
+                        if (o1.appointmentDate == null && o2.appointmentDate == null) return 0;
+                        if (o1.appointmentDate == null) return 1;
+                        if (o2.appointmentDate == null) return -1;
                         return o2.appointmentDate.compareTo(o1.appointmentDate);
                     }
                 });
@@ -272,7 +274,7 @@
                     <td><span class="status <%= appt.status.toLowerCase() %>"><%= appt.status %></span></td>
                 </tr>
             <%  }
-               } %>
+                } %>
             </tbody>
         </table>
     </div>

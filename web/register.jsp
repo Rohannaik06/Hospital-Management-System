@@ -5,100 +5,22 @@
 <head>
     <title>Patient Registration</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f4f8;
-            margin: 0; padding: 0; height: 100vh;
-        }
-        .wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            transition: filter 0.3s ease;
-        }
-        .blur {
-            filter: blur(4px);
-        }
-        .form-container {
-            background-color: white;
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #0077b6;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #005f87;
-        }
-        h2 {
-            color: #023e8a;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .message {
-            text-align: center;
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: green;
-        }
-        .error {
-            color: red;
-        }
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 999;
-            left: 0; top: 0;
-            width: 100%; height: 100%;
-            backdrop-filter: blur(4px);
-            background-color: rgba(0, 0, 0, 0.3);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-        .modal-content h3 {
-            color: #2a9d8f;
-            margin-bottom: 20px;
-        }
-        .modal-content a {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #0077b6;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-        }
-        .modal-content a:hover {
-            background-color: #005f87;
-        }
+        /* Your CSS remains the same */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; margin: 0; padding: 0; height: 100vh; }
+        .wrapper { display: flex; justify-content: center; align-items: center; height: 100%; transition: filter 0.3s ease; }
+        .blur { filter: blur(4px); }
+        .form-container { background-color: white; padding: 30px 40px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 1rem; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #0077b6; color: white; border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer; }
+        button:hover { background-color: #005f87; }
+        h2 { color: #023e8a; text-align: center; margin-bottom: 25px; }
+        .message { text-align: center; margin-bottom: 15px; font-weight: bold; color: green; }
+        .error { color: red; }
+        .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; backdrop-filter: blur(4px); background-color: rgba(0, 0, 0, 0.3); justify-content: center; align-items: center; }
+        .modal-content { background-color: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .modal-content h3 { color: #2a9d8f; margin-bottom: 20px; }
+        .modal-content a { display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: #0077b6; color: white; text-decoration: none; border-radius: 8px; }
+        .modal-content a:hover { background-color: #005f87; }
     </style>
 </head>
 <body>
@@ -131,35 +53,38 @@
                 isError = true;
             } else {
                 Connection conn = null;
-                PreparedStatement ps = null;
+                // DEBUG FIX: Use separate variables for each statement
+                PreparedStatement psCheck = null;
+                PreparedStatement psInsert = null;
+                ResultSet rs = null;
+
                 try {
                     Class.forName("com.mysql.jdbc.Driver");
                     conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "root");
 
                     // Check if username already exists
                     String checkSql = "SELECT COUNT(*) FROM patients WHERE username = ?";
-                    ps = conn.prepareStatement(checkSql);
-                    ps.setString(1, username);
-                    ResultSet rs = ps.executeQuery();
+                    psCheck = conn.prepareStatement(checkSql);
+                    psCheck.setString(1, username);
+                    rs = psCheck.executeQuery();
                     rs.next();
                     int count = rs.getInt(1);
-                    rs.close();
-                    ps.close();
 
                     if (count > 0) {
                         message = "Username already taken. Please choose another.";
                         isError = true;
                     } else {
+                        // Insert the new patient
                         String sql = "INSERT INTO patients (fullname, gender, address, phone, username, password) VALUES (?, ?, ?, ?, ?, ?)";
-                        ps = conn.prepareStatement(sql);
-                        ps.setString(1, fullname);
-                        ps.setString(2, gender);
-                        ps.setString(3, address);
-                        ps.setString(4, phone);
-                        ps.setString(5, username);
-                        ps.setString(6, password); // Secure in production - hash passwords!
+                        psInsert = conn.prepareStatement(sql);
+                        psInsert.setString(1, fullname);
+                        psInsert.setString(2, gender);
+                        psInsert.setString(3, address);
+                        psInsert.setString(4, phone);
+                        psInsert.setString(5, username);
+                        psInsert.setString(6, password); // Secure in production - hash passwords!
 
-                        int result = ps.executeUpdate();
+                        int result = psInsert.executeUpdate();
 
                         if (result > 0) {
                             showSuccessModal = true;
@@ -174,34 +99,37 @@
                     message = "Error: " + e.getMessage();
                     isError = true;
                 } finally {
-                    try { if (ps != null) ps.close(); } catch (Exception e) {}
+                    // DEBUG FIX: Close all resources properly
+                    try { if (rs != null) rs.close(); } catch (Exception e) {}
+                    try { if (psCheck != null) psCheck.close(); } catch (Exception e) {}
+                    try { if (psInsert != null) psInsert.close(); } catch (Exception e) {}
                     try { if (conn != null) conn.close(); } catch (Exception e) {}
                 }
             }
         }
     %>
 
-<h2>Patient Registration</h2>
+    <h2>Patient Registration</h2>
 
-<% if (!message.isEmpty()) { %>
-    <div class="message <%= isError ? "error" : "" %>"><%= message %></div>
-<% } %>
+    <% if (!message.isEmpty()) { %>
+        <div class="message <%= isError ? "error" : "" %>"><%= message %></div>
+    <% } %>
 
-<form method="post" action="register.jsp">
-    <input type="text" name="fullname" placeholder="Full Name" required value="<%= fullname %>" />
+    <form method="post" action="register.jsp">
+        <input type="text" name="fullname" placeholder="Full Name" required value="<%= fullname %>" />
 
-    <select name="gender" required>
-        <option value="" disabled <%= gender.isEmpty() ? "selected" : "" %>>Select Gender</option>
-        <option value="Male" <%= "Male".equals(gender) ? "selected" : "" %>>Male</option>
-        <option value="Female" <%= "Female".equals(gender) ? "selected" : "" %>>Female</option>
-    </select>
+        <select name="gender" required>
+            <option value="" disabled <%= gender.isEmpty() ? "selected" : "" %>>Select Gender</option>
+            <option value="Male" <%= "Male".equals(gender) ? "selected" : "" %>>Male</option>
+            <option value="Female" <%= "Female".equals(gender) ? "selected" : "" %>>Female</option>
+        </select>
 
-    <input type="text" name="address" placeholder="Address" required value="<%= address %>" />
-    <input type="tel" name="phone" placeholder="Phone Number" pattern="[0-9]{10}" title="Enter 10-digit phone number" required value="<%= phone %>" />
-    <input type="text" name="username" placeholder="Username" required value="<%= username %>" />
-    <input type="password" name="password" placeholder="Password" minlength="6" required />
-    <button type="submit">Register</button>
-</form>
+        <input type="text" name="address" placeholder="Address" required value="<%= address %>" />
+        <input type="tel" name="phone" placeholder="Phone Number" pattern="[0-9]{10}" title="Enter 10-digit phone number" required value="<%= phone %>" />
+        <input type="text" name="username" placeholder="Username" required value="<%= username %>" />
+        <input type="password" name="password" placeholder="Password" minlength="6" required />
+        <button type="submit">Register</button>
+    </form>
 
     </div>
 </div>

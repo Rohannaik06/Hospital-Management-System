@@ -69,40 +69,44 @@
         .sidebar .logout-link { color: #e63946; font-weight: 600; }
         .sidebar .logout-link:hover { background: #b22222 !important; color: white !important; }
 
-        /* Content Area - Unchanged */
+        /* Content Area - Adjusted */
         .dashboard-content {
-            margin-left: 0; padding: 36px 48px; transition: margin-left 0.3s ease;
-            min-height: calc(100vh - 120px);
-            padding-bottom: 80px;
+            margin-left: 0;
+            padding: 36px 48px;
+            transition: margin-left 0.3s ease;
+            min-height: calc(100vh - 70px); /* Adjusted to ensure content area is tall enough */
+            padding-bottom: 20px; /* Reduced padding to make space for footer */
         }
         .sidebar.active ~ .dashboard-content { margin-left: 280px; }
 
-        /* Footer - Unchanged */
+        /* --- MODIFIED FOOTER --- */
         footer {
-            background: #023e8a; color: white; text-align: center; 
-            padding: 18px 10px; font-size: 1rem; 
-            width: 100%; position: fixed; 
-            bottom: 0; left: 0;
+            background: #023e8a;
+            color: white;
+            text-align: center;
+            padding: 18px 10px;
+            font-size: 1rem;
+            width: 100%;
+            /* REMOVED: position: fixed; bottom: 0; left: 0; */
         }
         footer a { color: #90e0ef; text-decoration: none; }
         footer a:hover { text-decoration: underline; }
 
         @media (max-width: 768px) {
-            .dashboard-content { margin-left: 0 !important; padding: 20px; padding-bottom: 80px; }
+            .dashboard-content { margin-left: 0 !important; padding: 20px; }
             .sidebar { top: 60px; }
-            .profile-details { flex-direction: column; } /* Stack cards on small screens */
+            .profile-details { flex-direction: column; }
         }
 
         /* --- MODIFIED PROFILE STYLES --- */
         .profile-container {
-            max-width: 1000px; /* MODIFICATION: Increased width */
+            max-width: 1000px;
             margin: 30px auto;
             background: #fff;
             border-radius: 10px;
-            padding: 24px 30px; /* Adjusted padding */
+            padding: 24px 30px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        
         .profile-header-content {
             display: flex;
             align-items: center;
@@ -135,20 +139,17 @@
             font-size: 16px;
             color: #666;
         }
-        
-        /* MODIFICATION: Using Flexbox to place inner divs on one line */
         .profile-details {
             display: flex;
-            gap: 24px; /* Space between the two cards */
-            align-items: flex-start; /* Aligns items to the top */
+            gap: 24px;
+            align-items: flex-start;
         }
-
         .detail-card {
             background: #fafafa;
             padding: 20px;
             border-radius: 8px;
             border: 1px solid #eee;
-            flex: 1; /* Allows both cards to grow and share space */
+            flex: 1;
         }
         .detail-card h3 {
             font-size: 18px;
@@ -171,7 +172,6 @@
             color: #333;
             font-weight: 600;
         }
-
         .update-btn-group {
             margin-top: 20px;
             padding-top: 20px;
@@ -198,13 +198,13 @@
 <%
     // --- JSP LOGIC - Unchanged ---
     String sessionFullname = (String) session.getAttribute("fullname");
-    String profileEmoji = "🧑"; 
+    String profileEmoji = "🧑";
 
     if (sessionFullname == null || sessionFullname.isEmpty()) {
         response.sendRedirect("patientlogin.jsp");
         return;
     }
-    
+
     String patientId = "N/A";
     String patientFullname = sessionFullname;
     String patientGender = "N/A";
@@ -212,7 +212,7 @@
     String patientPhone = "N/A";
     String patientUsername = "N/A";
     String patientCreatedAt = "N/A";
-    
+
     Connection conn = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
@@ -220,12 +220,12 @@
     try {
         Class.forName("com.mysql.jdbc.Driver");
         conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS?useSSL=false&serverTimezone=UTC", "root", "root");
-        
+
         String sql = "SELECT pid, fullname, gender, address, phone, username, created_at FROM patients WHERE fullname = ?";
         ps = conn.prepareStatement(sql);
         ps.setString(1, sessionFullname);
         rs = ps.executeQuery();
-        
+
         if (rs.next()) {
             patientId = String.valueOf(rs.getInt("pid"));
             patientFullname = rs.getString("fullname");
@@ -233,7 +233,7 @@
             patientAddress = rs.getString("address") != null ? rs.getString("address") : "Not Provided";
             patientPhone = rs.getString("phone") != null ? rs.getString("phone") : "N/A";
             patientUsername = rs.getString("username") != null ? rs.getString("username") : "N/A";
-            
+
             Timestamp ts = rs.getTimestamp("created_at");
             if (ts != null) {
                 patientCreatedAt = new SimpleDateFormat("dd MMMM, yyyy 'at' hh:mm a").format(ts);
@@ -245,7 +245,7 @@
                 profileEmoji = "👩";
             }
         }
-        
+
     } catch (Exception e) {
         // Handle exception
     } finally {
@@ -283,7 +283,7 @@
 
 <div class="dashboard-content">
     <div class="profile-container">
-        
+
         <div class="profile-header-content">
             <div class="profile-photo"><%= profileEmoji %></div>
             <div class="profile-basic">
@@ -302,7 +302,7 @@
                 <p class="detail-item"><strong>Phone:</strong> <%= patientPhone %></p>
                 <p class="detail-item"><strong>Account Since:</strong> <%= patientCreatedAt %></p>
             </div>
-            
+
             <div class="detail-card">
                 <h3>Residential Address</h3>
                 <p class="detail-item"><%= patientAddress %></p>
@@ -314,7 +314,7 @@
             <a href="edit_patient_profile.jsp" class="update-btn">Edit Details</a>
             <a href="change_password.jsp" class="update-btn" style="background:#4CAF50;">Change Password</a>
         </div>
-            
+
     </div>
 </div>
 
