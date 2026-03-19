@@ -1,132 +1,92 @@
-# Hospital Management System 
-A comprehensive, web-based Hospital Management System (HMS) designed to automate and streamline the core operations of healthcare facilities. This project replaces manual, paper-based methods with efficient digital workflows, improving data accuracy, patient care, and overall operational efficiency.
+# Hospital Management System
 
-🌟 Abstract
-The Hospital Management System (HMS) is a web-based solution that manages patient registrations, medical records, appointments, and staff schedules through a secure, role-based access model. Its implementation enables hospitals to maintain accurate and up-to-date patient and administrative data, improve resource utilization, and minimize operational errors. The system features distinct modules for administrators, doctors, and patients, supporting real-time information sharing and seamless coordination between departments.
+A comprehensive, web-based Hospital Management System (HMS) designed to automate and streamline the core operations of healthcare facilities. This project replaces manual, paper-based workflows with an efficient digital solution, improving data accuracy, patient care, and overall operational efficiency.
 
-🎯 Project Objective
-The primary objectives of this project are to:
+The system provides distinct, secure portals for patients and doctors, enabling seamless management of registrations, medical records, appointments, and staff schedules.
 
-Automate Operations: Computerize patient and hospital data to improve data retrieval, storage, and analysis.
+## Key Features
 
-Enhance Patient Care: Streamline appointment scheduling and provide patients with easy access to their medical information.
+This system is divided into two primary portals: one for Patients and one for Doctors.
 
-Improve Management: Provide secure role-based access for doctors, staff, and administrators to improve departmental coordination and resource utilization.
+### 👨‍⚕️ Doctor Portal
+*   **Secure Login:** Doctors can authenticate securely using their credentials.
+*   **Dashboard:** A central hub to view and manage all patient appointments for a selected date.
+*   **Appointment Management:** Real-time ability to approve, hold (as pending), or cancel patient appointments.
+*   **Patient Search:** Quickly find patients by name.
+*   **Staff Management:** View a complete directory of hospital staff, add new staff members via a dedicated form, and remove staff records.
+*   **Profile Management:** Doctors can view and update their professional profiles.
 
-Data-Driven Decisions: Ensure better decision-making supported by comprehensive reporting and analytics.
+### ❤️ Patient Portal
+*   **Secure Login & Registration:** Patients can easily create an account or log in to the system.
+*   **Dashboard & Doctor Search:** A user-friendly dashboard to search for doctors by name, hospital, or specialization.
+*   **Appointment Booking:** A simple form to book appointments with a chosen doctor, including a real-time view of already booked slots.
+*   **Appointment History:** View a comprehensive list of upcoming and past appointments, with the option to cancel upcoming ones.
+*   **Profile Management:** Patients can manage their personal information.
 
-✨ Key Features
-This system is divided into two main portals: one for Doctors and one for Patients.
+## Technology Stack
+*   **Frontend:** JSP (JavaServer Pages), HTML, CSS, JavaScript
+*   **Backend:** Java (Logic embedded in JSP files using scriptlets)
+*   **Database:** MySQL
+*   **Web Server:** Apache Tomcat
+*   **Build Tool:** Apache Ant
 
-👨‍⚕️ Doctor Portal
-Secure Login: Doctors can log in with their credentials.
+## System Architecture
 
-Dashboard: View and manage patient appointments for specific dates.
+The application is built on a multi-tier architecture:
 
-Appointment Management: Approve, pending, or cancel patient appointments in real-time.
+*   **Presentation Layer:** The user interface is rendered using JSP pages, styled with CSS, and made interactive with JavaScript. This is the layer that users directly interact with.
+*   **Business Logic Layer:** The core application logic, including user authentication, data processing, and session management, is handled directly within the JSP files using Java scriptlets.
+*   **Data Access Layer:** Database communication is performed using Java Database Connectivity (JDBC) from within the JSP files to execute SQL queries against the MySQL database.
+*   **Database Layer:** A MySQL database stores all persistent data, including patient records, doctor profiles, staff details, and appointment information.
 
-Patient Search: Quickly search for patients by name.
+## Getting Started
 
-Staff Management: View a directory of all hospital staff members.
+Follow these instructions to get a local copy of the project up and running.
 
-Add Staff: A form to add new staff members to the hospital's system.
+### Prerequisites
+*   **JDK 8** or higher
+*   **MySQL Server**
+*   **Apache Tomcat 9** or a compatible version
+*   An IDE like **NetBeans**, **IntelliJ IDEA**, or **Eclipse**
 
-Profile Management: Doctors can view and edit their professional profiles.
+### Installation & Setup
 
+1.  **Clone the repository:**
+    ```sh
+    git clone https://github.com/rohannaik06/hospital-management-system.git
+    ```
 
-❤️ Patient Portal
-Secure Login/Registration: Patients can create an account and log in.
+2.  **Database Setup:**
+    *   Open your MySQL client (e.g., MySQL Workbench, phpMyAdmin).
+    *   Create a new database named `HMS`:
+        ```sql
+        CREATE DATABASE HMS;
+        ```
+    *   Create the required tables. You can use the SQL queries from the registration and data display forms in the JSP files as a reference. Key tables include `doctors`, `patients`, `appointments`, and `staff`.
 
-Dashboard: Search for doctors by name, hospital, or specialization.
+3.  **Configure the Project:**
+    *   Open the project in your IDE.
+    *   Locate the database connection strings, which are hardcoded in several JSP files (e.g., `doctorlogin.jsp`, `register.jsp`, `appointment.jsp`).
+    *   Update the database URL, username, and password to match your MySQL setup. The default credentials in the project are `user: "root"` and `password: "root"`.
 
-Book Appointments: A user-friendly form to book appointments with a chosen doctor.
+    **Example Connection String in JSP files:**
+    ```java
+    // Find and update this line in the relevant JSP files
+    conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "your_username", "your_password");
+    ```
 
-View Doctors: See a list of available doctors and their details.
+4.  **Add JDBC Driver:**
+    *   Ensure the **MySQL Connector/J** JAR file is included in your project's build path or library folder (`WEB-INF/lib`). The project is configured to use `mysql-connector-java-5.1.49-bin.jar`.
 
-Appointment History: View past and upcoming appointments.
+5.  **Deploy to Tomcat:**
+    *   Configure your IDE to use your installed Apache Tomcat server.
+    *   Build the project, which will generate a `.war` file (e.g., `HMS1.war`).
+    *   Deploy the generated `.war` file to your Tomcat server.
 
-Profile Management: Patients can manage their personal and medical information.
-
-🛠️ Technology Stack
-Frontend: HTML, CSS, JavaScript
-
-Backend: Java Servlets, JSP (JavaServer Pages)
-
-Database: MySQL
-
-Web Server: Apache Tomcat
-
-⚙️ System Architecture
-The system employs a multi-tier architecture:
-
-Presentation Layer: The user interface built with HTML, CSS, and JSP pages that users interact with.
-
-Business Logic Layer: Consists of Java Servlets that process user requests and implement the core application logic.
-
-Data Layer: A MySQL database that stores all persistent data, including patient records, appointments, and staff information.
-
-🚀 Getting Started
-To get a local copy up and running, follow these simple steps.
-
-Prerequisites
-JDK (Java Development Kit): Ensure you have JDK 8 or higher installed.
-
-MySQL: Install a MySQL server. You can use XAMPP, WAMP, or install it directly.
-
-Apache Tomcat: Install Tomcat 9 or a compatible version.
-
-IDE: An IDE like IntelliJ IDEA, Eclipse, or VS Code with Java support.
-
-Installation & Setup
-Clone the repository:
-
-git clone ([https://github.com/rohannaik06/hospital-management-system.git](https://github.com/Rohannaik06/Hospital-Management-System))
-
-Database Setup:
-
-Open your MySQL client (like phpMyAdmin or MySQL Workbench).
-
-Create a new database named HMS.
-
-Import the database.sql file (if provided) or manually create the necessary tables (doctors, patients, appointments, staff).
-
-Configure the Project:
-
-Open the project in your favorite IDE.
-
-Locate the database connection strings in the .jsp files (e.g., in doctorlogin.jsp, appointment.jsp, etc.).
-
-Update the database URL, username, and password to match your MySQL setup.
-
-// Example connection string in JSP files
-conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/HMS", "root", "your_password");
-
-Deploy to Tomcat:
-
-Configure your IDE to use your installed Apache Tomcat server.
-
-Build the project to generate a .war file.
-
-Deploy the .war file to your Tomcat server.
-
-Access the Application:
-
-Start your Tomcat server.
-
-Open your web browser and navigate to http://localhost:8080/your_project_name/.
-
-🤝 Contributing
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
-
-Fork the Project
-
-Create your Feature Branch (git checkout -b feature/AmazingFeature)
-
-Commit your Changes (git commit -m 'Add some AmazingFeature')
-
-Push to the Branch (git push origin feature/AmazingFeature)
-
-Open a Pull Request
-
-📄 License
-Distributed under the MIT License. See LICENSE for more information.
+6.  **Access the Application:**
+    *   Start your Tomcat server.
+    *   Open your web browser and navigate to the application's entry point, typically `index.html`.
+        ```
+        http://localhost:8080/HMS1/
+        ```
+        *Note: The context path `/HMS1` is defined in `web/META-INF/context.xml`.*
